@@ -1,11 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// ── Imóveis ──────────────────────────────────────────────────────────────────
+// â”€â”€ ImÃ³veis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function getImoveis(filtros?: Record<string, unknown>) {
   let query = supabase
@@ -66,7 +66,7 @@ export async function deleteImovel(id: string) {
   if (error) throw error
 }
 
-// ── Análise de preço ─────────────────────────────────────────────────────────
+// â”€â”€ AnÃ¡lise de preÃ§o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function getImovelSimilares(
   bairro: string,
@@ -91,5 +91,3 @@ export async function getImovelSimilares(
   if (error) throw error
   return data ?? []
 }
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
