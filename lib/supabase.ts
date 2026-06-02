@@ -5,7 +5,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// â”€â”€ ImÃ³veis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Imóveis ──────────────────────────────────────────────────────────────────
 
 export async function getImoveis(filtros?: Record<string, unknown>) {
   let query = supabase
@@ -16,8 +16,13 @@ export async function getImoveis(filtros?: Record<string, unknown>) {
 
   if (filtros?.tipo) query = query.eq('tipo', filtros.tipo)
   if (filtros?.negocio) query = query.eq('negocio', filtros.negocio)
-  if (filtros?.bairro) query = query.ilike('bairro', `%${filtros.bairro}%`)
+
+  // ✅ CORRIGIDO: busca em bairro OU cidade com o mesmo termo
+  if (filtros?.bairro) {
+    query = query.or(`bairro.ilike.%${filtros.bairro}%,cidade.ilike.%${filtros.bairro}%`)
+  }
   if (filtros?.cidade) query = query.ilike('cidade', `%${filtros.cidade}%`)
+
   if (filtros?.preco_min) query = query.gte('preco', filtros.preco_min)
   if (filtros?.preco_max) query = query.lte('preco', filtros.preco_max)
   if (filtros?.quartos_min) query = query.gte('quartos', filtros.quartos_min)
@@ -66,7 +71,7 @@ export async function deleteImovel(id: string) {
   if (error) throw error
 }
 
-// â”€â”€ AnÃ¡lise de preÃ§o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Análise de preço ──────────────────────────────────────────────────────────
 
 export async function getImovelSimilares(
   bairro: string,
