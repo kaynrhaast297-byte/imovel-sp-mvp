@@ -76,7 +76,7 @@ export function slugify(texto: string): string {
  */
 export function calcularPrecoM2Medio(imoveis: Imovel[]): number {
   if (imoveis.length === 0) return 0
-  const total = imoveis.reduce((sum, imovel) => sum + imovel.preco_m2, 0)
+ const total = imoveis.reduce((sum, imovel) => sum + (imovel.preco / imovel.area_m2), 0)
   return Math.round(total / imoveis.length)
 }
 
