@@ -301,9 +301,10 @@ select option {
 }
 
 .home-section {
-  width: min(1120px, calc(100% - 2rem));
+  box-sizing: border-box;
+  width: min(1120px, 100%);
   margin: 0 auto;
-  padding: clamp(3.5rem, 7vw, 6rem) 0;
+  padding: clamp(3.5rem, 7vw, 6rem) 1rem;
 }
 
 .home-section-head {
@@ -448,6 +449,10 @@ select option {
   overflow: hidden;
 }
 
+.map-section h2 {
+  font-size: clamp(2rem, 4.4vw, 3.35rem);
+}
+
 .map-frame {
   position: relative;
   height: 420px;
@@ -475,9 +480,9 @@ select option {
   padding: 0.42rem 0.65rem;
 }
 
-.pin-one { left: 29%; top: 42%; }
-.pin-two { left: 54%; top: 61%; }
-.pin-three { left: 47%; top: 70%; }
+.pin-one { left: 26%; top: 52%; }
+.pin-two { left: 45%; top: 66%; }
+.pin-three { left: 42%; top: 61%; }
 
 .testimonials {
   border-top: 1px solid var(--border);
@@ -600,7 +605,12 @@ select option {
   }
 
   .home-section {
-    width: min(1120px, calc(100% - 1rem));
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .map-section h2 {
+    font-size: clamp(1.75rem, 7.6vw, 2.25rem);
   }
 
   .featured-photo,

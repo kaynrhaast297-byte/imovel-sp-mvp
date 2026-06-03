@@ -207,7 +207,7 @@ export default function Home() {
         <div className="map-frame">
           <iframe
             title="Mapa de Sao Paulo"
-            src="https://www.openstreetmap.org/export/embed.html?bbox=-46.739%2C-23.66%2C-46.54%2C-23.49&layer=mapnik"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=-46.78%2C-23.68%2C-46.45%2C-23.43&layer=mapnik&marker=-23.56%2C-46.64"
           />
           <div className="map-pin pin-one">Pinheiros</div>
           <div className="map-pin pin-two">Moema</div>
