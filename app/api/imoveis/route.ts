@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getImoveis, createImovel } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,6 +23,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdmin(req)
+  if (unauthorized) return unauthorized
+
   try {
     const body = await req.json()
     const imovel = await createImovel({

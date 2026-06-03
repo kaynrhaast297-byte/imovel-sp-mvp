@@ -47,8 +47,17 @@ export interface AnalisePreco {
   preco_medio_bairro: number
   preco_m2_imovel: number
   preco_m2_medio_bairro: number
+  preco_m2_mediano_bairro: number
+  preco_estimado_justo: number
+  menor_preco_comparavel: number
+  maior_preco_comparavel: number
+  economia_estimativa: number
+  economia_percentual: number
   percentual_diferenca: number
   classificacao: 'abaixo' | 'na_media' | 'acima'
+  confianca: 'baixa' | 'media' | 'alta'
+  criterio: string
+  recomendacao: string
   imoveis_comparados: number
   imoveis_similares: ImovelSimilar[]
 }
@@ -60,6 +69,9 @@ export interface ImovelSimilar {
   area_m2: number
   quartos?: number
   bairro: string
+  cidade?: string
+  tipo?: TipoImovel
+  negocio?: TipoNegocio
   portal_origem?: string
   url_original?: string
 }

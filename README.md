@@ -1,71 +1,64 @@
-# Imóvel SP MVP - Comparador de Preços
+# Imovel SP MVP
 
-Plataforma para comparação de preços de imóveis em São Paulo (MVP).
+Comparador de precos de imoveis em Sao Paulo. A ideia central do MVP e ajudar o usuario a entender se um imovel esta abaixo, dentro ou acima da media local.
 
-## 🎯 Fase 1 (MVP)
+## Funcionalidades atuais
 
-- Busca por imóveis (bairro, faixa de preço, tipo, quartos)
-- Listagem com cards informativos
-- Página de detalhes do imóvel
-- Análise de preço justo (comparação com média do bairro)
-- Painel administrativo para entrada manual de imóveis
-- API REST para CRUD de imóveis
+- Busca por bairro/cidade, tipo, negocio, quartos e preco maximo
+- Listagem com cards de imoveis
+- Pagina de detalhes do imovel
+- Analise de preco com comparacao por imoveis similares
+- Painel admin para cadastro manual
+- API REST para leitura e escrita de imoveis
+- Supabase com RLS para leitura publica e escrita administrativa
 
-## 🚀 Getting Started
+## Stack
+
+- Next.js + React + TypeScript
+- Supabase/PostgreSQL
+- Tailwind CSS
+
+## Como executar
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) no navegador.
+Abra `http://localhost:3000`.
 
-## 📋 Stack Tecnológico
+## Variaveis de ambiente
 
-- Next.js 16.2 + React 19 + TypeScript
-- Supabase (PostgreSQL + Auth)
-- Tailwind CSS 4
-- MeiliSearch (busca)
-- OpenStreetMap (mapa)
+Crie `.env.local` com base em `.env.example`:
 
-## 📁 Estrutura de Pastas
-
-```
-app/
-├── layout.tsx          # Layout raiz
-├── page.tsx            # Home com busca
-├── globals.css         # Estilos globais
-├── imovel/
-│   └── [id]/
-│       └── page.tsx    # Detalhes do imóvel
-├── admin/
-│   ├── layout.tsx      # Layout admin
-│   └── page.tsx        # Formulário de entrada
-└── api/
-    ├── imoveis/
-    │   ├── route.ts    # GET/POST imoveis
-    │   └── [id]/
-    │       └── route.ts # GET/PUT/DELETE imovel
-    └── analise/
-        └── route.ts    # Análise de preço
-
-components/
-├── SearchForm.tsx      # Formulário de busca
-├── ImovelCard.tsx      # Card do imóvel
-├── PriceAnalysis.tsx   # Análise de preço
-└── Map.tsx             # Mapa OpenStreetMap
-
-lib/
-├── supabase.ts         # Cliente Supabase
-├── types.ts            # Tipos TypeScript
-└── utils.ts            # Funções utilitárias
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SECRET_KEY=
+IMOVEL_ADMIN_TOKEN=
 ```
 
-## ⚙️ Configuração
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` pode ser usada no browser para leitura publica. `SUPABASE_SECRET_KEY` ou `SUPABASE_SERVICE_ROLE_KEY` deve ficar somente no servidor e e usada para criar/editar/inativar imoveis. `IMOVEL_ADMIN_TOKEN` e o token digitado no painel `/admin`.
 
-Crie `.env.local` com:
+## Banco de dados
 
+Execute `supabase_schema.sql` no SQL Editor do Supabase.
+
+O schema atual habilita RLS nas tabelas publicas, permite leitura anonima apenas de imoveis ativos e reserva escrita para o backend usando chave server-side.
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run type-check
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
+
+## Proximos passos
+
+- Adicionar upload/galeria de fotos
+- Criar login real com Supabase Auth para o admin
+- Evoluir a analise para ponderar preco/m2, quartos, bairro, tipo, negocio e area
+- Adicionar mapa e dados de geolocalizacao
+- Adicionar edicao/listagem administrativa de imoveis cadastrados

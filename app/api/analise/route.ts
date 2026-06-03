@@ -9,9 +9,7 @@ export async function GET(req: NextRequest) {
     if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 })
 
     const imovel = await getImovelById(id)
-    const similares = await getImovelSimilares(
-      imovel.bairro, imovel.tipo, imovel.quartos ?? null, imovel.area_m2, imovel.id
-    )
+    const similares = await getImovelSimilares(imovel)
     const analise = calcularAnalise(imovel, similares)
     return NextResponse.json({ analise })
   } catch (err) {

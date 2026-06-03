@@ -1,16 +1,17 @@
 'use client'
 
-import { Suspense } from 'react'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Imovel } from '@/lib/types'
 import ImovelCard from '@/components/ImovelCard'
+import { calcularPrecoM2 } from '@/lib/utils'
 
 function BuscaConteudo() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [imoveis, setImoveis] = useState<Imovel[]>([])
   const [loading, setLoading] = useState(true)
+  const [ordenacao, setOrdenacao] = useState('recentes')
   const [form, setForm] = useState({
     bairro: searchParams.get('bairro') ?? '',
     tipo: searchParams.get('tipo') ?? '',
@@ -20,23 +21,28 @@ function BuscaConteudo() {
   })
 
   useEffect(() => {
-    buscar()
+    let ativo = true
+
+    async function carregar() {
+      try {
+        const res = await fetch(`/api/imoveis?${searchParams.toString()}`)
+        const data = await res.json()
+        if (ativo) setImoveis(data.imoveis ?? [])
+      } catch {
+        if (ativo) setImoveis([])
+      } finally {
+        if (ativo) setLoading(false)
+      }
+    }
+
+    void carregar()
+    return () => {
+      ativo = false
+    }
   }, [searchParams])
 
-  async function buscar() {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/imoveis?${searchParams.toString()}`)
-      const data = await res.json()
-      setImoveis(data.imoveis ?? [])
-    } catch {
-      setImoveis([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
   function aplicarFiltros() {
+    setLoading(true)
     const params = new URLSearchParams()
     if (form.bairro) params.set('bairro', form.bairro)
     if (form.tipo) params.set('tipo', form.tipo)
@@ -45,6 +51,15 @@ function BuscaConteudo() {
     if (form.preco_max) params.set('preco_max', form.preco_max)
     router.push(`/busca?${params.toString()}`)
   }
+
+  const imoveisOrdenados = useMemo(() => {
+    return [...imoveis].sort((a, b) => {
+      if (ordenacao === 'preco_m2_asc') return calcularPrecoM2(a.preco, a.area_m2) - calcularPrecoM2(b.preco, b.area_m2)
+      if (ordenacao === 'preco_asc') return a.preco - b.preco
+      if (ordenacao === 'area_desc') return b.area_m2 - a.area_m2
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }, [imoveis, ordenacao])
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2rem', alignItems: 'start' }}>
@@ -94,11 +109,19 @@ function BuscaConteudo() {
       </aside>
 
       <div>
-        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.5rem' }}>
+        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem' }}>
             {loading ? 'Buscando...' : `${imoveis.length} imovel${imoveis.length !== 1 ? 'is' : ''} encontrado${imoveis.length !== 1 ? 's' : ''}`}
           </h1>
-          {form.bairro && <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>em <strong style={{ color: 'var(--text)' }}>{form.bairro}</strong></span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {form.bairro && <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>em <strong style={{ color: 'var(--text)' }}>{form.bairro}</strong></span>}
+            <select value={ordenacao} onChange={(event) => setOrdenacao(event.target.value)} style={{ width: 'auto', minWidth: '190px' }}>
+              <option value="recentes">Mais recentes</option>
+              <option value="preco_m2_asc">Menor preco/m2</option>
+              <option value="preco_asc">Menor preco total</option>
+              <option value="area_desc">Maior area</option>
+            </select>
+          </div>
         </div>
 
         {loading ? (
@@ -115,7 +138,7 @@ function BuscaConteudo() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
-            {imoveis.map(im => <ImovelCard key={im.id} imovel={im} />)}
+            {imoveisOrdenados.map(im => <ImovelCard key={im.id} imovel={im} />)}
           </div>
         )}
       </div>

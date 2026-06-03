@@ -9,9 +9,7 @@ export default async function ImovelPage({ params }: { params: { id: string } })
 
   try {
     imovel = await getImovelById(params.id)
-    const similares = await getImovelSimilares(
-      imovel.bairro, imovel.tipo, imovel.quartos ?? null, imovel.area_m2, imovel.id
-    )
+    const similares = await getImovelSimilares(imovel)
     analise = calcularAnalise(imovel, similares)
   } catch {
     return (
@@ -55,7 +53,7 @@ export default async function ImovelPage({ params }: { params: { id: string } })
             {imovel.portal_origem && <span className="badge" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{imovel.portal_origem}</span>}
           </div>
 
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: '1.75rem', marginBottom: '0.5rem' }}>{imovel.titulo}</h1>
+          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.75rem', marginBottom: '0.5rem' }}>{imovel.titulo}</h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>📍 {imovel.endereco ?? imovel.bairro}, {imovel.cidade} – {imovel.estado}</p>
 
           {/* Atributos */}
