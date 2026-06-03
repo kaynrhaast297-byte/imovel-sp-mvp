@@ -4,30 +4,36 @@
   "description": "Platform for comparing real estate prices in São Paulo",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@supabase/supabase-js": "^2.40.0",
+    "@tanstack/react-query": "^5.101.0",
+    "axios": "^1.6.0",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.0.0",
+    "lucide-react": "^1.17.0",
     "next": "^16.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@supabase/supabase-js": "^2.40.0",
-    "axios": "^1.6.0",
-    "clsx": "^2.1.0",
-    "date-fns": "^3.0.0"
+    "react-hook-form": "^7.77.0",
+    "swiper": "^12.2.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "tailwindcss": "^4.0.0",
-    "postcss": "^8.4.0",
-    "typescript": "^5",
-    "@tailwindcss/postcss": "^4.0.0",
     "eslint": "^9",
-    "eslint-config-next": "^16.2.0"
+    "eslint-config-next": "^16.2.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5"
   }
 }

@@ -42,6 +42,15 @@ export interface ImovelFiltros {
   area_max?: number
 }
 
+export interface Pagination {
+  page: number
+  per_page: number
+  total: number
+  total_pages: number
+  has_next: boolean
+  has_prev: boolean
+}
+
 export interface AnalisePreco {
   imovel_id: string
   preco_medio_bairro: number
@@ -107,5 +116,17 @@ export interface AlertaPreco {
   preco_max: number
   quartos_min?: number
   ativo: boolean
+  created_at: string
+}
+
+export interface Lead {
+  id: string
+  imovel_id?: string
+  nome: string
+  telefone: string
+  email?: string
+  mensagem: string
+  origem: string
+  status: 'novo' | 'em_atendimento' | 'fechado' | 'perdido'
   created_at: string
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getImoveis, createImovel } from '@/lib/supabase'
 import { requireAdmin } from '@/lib/admin-auth'
+import { createImovel, getImoveis } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,11 +14,14 @@ export async function GET(req: NextRequest) {
     if (searchParams.get('preco_min')) filtros.preco_min = Number(searchParams.get('preco_min'))
     if (searchParams.get('preco_max')) filtros.preco_max = Number(searchParams.get('preco_max'))
     if (searchParams.get('quartos')) filtros.quartos_min = Number(searchParams.get('quartos'))
+    if (searchParams.get('ordenacao')) filtros.ordenacao = searchParams.get('ordenacao')
+    if (searchParams.get('page')) filtros.page = Number(searchParams.get('page'))
+    if (searchParams.get('per_page')) filtros.per_page = Number(searchParams.get('per_page'))
 
-    const imoveis = await getImoveis(filtros)
-    return NextResponse.json({ imoveis })
+    const result = await getImoveis(filtros)
+    return NextResponse.json(result)
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao buscar imóveis', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao buscar imoveis', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -36,6 +39,6 @@ export async function POST(req: NextRequest) {
     })
     return NextResponse.json({ imovel }, { status: 201 })
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao criar imóvel', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao criar imovel', detail: String(err) }, { status: 500 })
   }
 }

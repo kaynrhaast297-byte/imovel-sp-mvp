@@ -47,6 +47,12 @@ function asNumber(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
+function asPositiveInteger(value: unknown, fallback: number, max: number) {
+  const numberValue = typeof value === 'number' ? value : Number(value)
+  if (!Number.isInteger(numberValue) || numberValue < 1) return fallback
+  return Math.min(numberValue, max)
+}
+
 function sanitizeSearchTerm(value: unknown) {
   return asText(value).replace(/[,%]/g, ' ').replace(/\s+/g, ' ').trim()
 }
@@ -55,11 +61,15 @@ function sanitizeSearchTerm(value: unknown) {
 
 export async function getImoveis(filtros?: Record<string, unknown>) {
   const supabase = getPublicClient()
+  const page = asPositiveInteger(filtros?.page, 1, 10000)
+  const perPage = asPositiveInteger(filtros?.per_page, 12, 48)
+  const from = (page - 1) * perPage
+  const to = from + perPage - 1
+
   let query = supabase
     .from('imoveis')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('status', 'ativo')
-    .order('created_at', { ascending: false })
 
   const tipo = asText(filtros?.tipo)
   const negocio = asText(filtros?.negocio)
@@ -68,6 +78,7 @@ export async function getImoveis(filtros?: Record<string, unknown>) {
   const precoMin = asNumber(filtros?.preco_min)
   const precoMax = asNumber(filtros?.preco_max)
   const quartosMin = asNumber(filtros?.quartos_min)
+  const ordenacao = asText(filtros?.ordenacao)
 
   if (tipo) query = query.eq('tipo', tipo)
   if (negocio) query = query.eq('negocio', negocio)
@@ -77,9 +88,33 @@ export async function getImoveis(filtros?: Record<string, unknown>) {
   if (precoMax !== null) query = query.lte('preco', precoMax)
   if (quartosMin !== null) query = query.gte('quartos', quartosMin)
 
-  const { data, error } = await query
+  if (ordenacao === 'preco_m2_asc') {
+    query = query.order('preco_m2', { ascending: true, nullsFirst: false })
+  } else if (ordenacao === 'preco_asc') {
+    query = query.order('preco', { ascending: true })
+  } else if (ordenacao === 'area_desc') {
+    query = query.order('area_m2', { ascending: false })
+  } else {
+    query = query.order('created_at', { ascending: false })
+  }
+
+  const { data, error, count } = await query.range(from, to)
   if (error) throw error
-  return data
+
+  const total = count ?? 0
+  const totalPages = Math.max(Math.ceil(total / perPage), 1)
+
+  return {
+    imoveis: data ?? [],
+    pagination: {
+      page,
+      per_page: perPage,
+      total,
+      total_pages: totalPages,
+      has_next: page < totalPages,
+      has_prev: page > 1,
+    },
+  }
 }
 
 export async function getImovelById(id: string) {
@@ -119,6 +154,16 @@ export async function deleteImovel(id: string) {
     .update({ status: 'inativo' })
     .eq('id', id)
   if (error) throw error
+}
+
+// Leads
+
+export async function createLead(lead: Record<string, unknown>) {
+  const { error } = await getPublicClient()
+    .from('leads')
+    .insert(lead)
+  if (error) throw error
+  return { ok: true }
 }
 
 // Analise de preco
