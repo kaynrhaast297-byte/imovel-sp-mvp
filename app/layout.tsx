@@ -9,15 +9,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="pt-BR" data-scroll-behavior="smooth">
       <body>
         <header style={{
           background: 'var(--bg-card)',
@@ -34,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{
               alignItems: 'center',
-              background: 'var(--primary)',
+              background: 'var(--primary-action)',
               borderRadius: 'var(--radius-sm)',
               color: '#fff',
               display: 'inline-flex',
@@ -53,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>Buscar</Link>
+            <Link href="/ai" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>IA Local</Link>
             <Link href="/admin" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>Admin</Link>
           </nav>
         </header>

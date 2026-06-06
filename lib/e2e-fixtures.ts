@@ -1,0 +1,52 @@
+import type { Imovel, ImovelSimilar } from './types'
+
+export const e2eImovel: Imovel = {
+  id: 'imovel-1',
+  titulo: 'Apto Pinheiros',
+  descricao: 'Apartamento mockado para testes E2E.',
+  tipo: 'apartamento',
+  negocio: 'venda',
+  status: 'ativo',
+  preco: 900000,
+  condominio: 850,
+  iptu: 2400,
+  area_m2: 90,
+  quartos: 2,
+  banheiros: 2,
+  vagas: 1,
+  bairro: 'Pinheiros',
+  cidade: 'Sao Paulo',
+  estado: 'SP',
+  endereco: 'Rua dos Testes, 123',
+  portal_origem: 'Mock',
+  url_original: 'https://example.com/imovel-1',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+}
+
+export const e2eImoveisSimilares: ImovelSimilar[] = [
+  {
+    id: 'similar-1',
+    titulo: 'Apto similar em Pinheiros',
+    preco: 990000,
+    area_m2: 92,
+    quartos: 2,
+    bairro: 'Pinheiros',
+    cidade: 'Sao Paulo',
+    tipo: 'apartamento',
+    negocio: 'venda',
+    portal_origem: 'Mock',
+  },
+  {
+    id: 'similar-2',
+    titulo: 'Apartamento comparavel',
+    preco: 1080000,
+    area_m2: 96,
+    quartos: 2,
+    bairro: 'Pinheiros',
+    cidade: 'Sao Paulo',
+    tipo: 'apartamento',
+    negocio: 'venda',
+    portal_origem: 'Mock',
+  },
+]

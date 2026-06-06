@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { e2eImovel, e2eImoveisSimilares } from './e2e-fixtures'
 import type { Imovel, ImovelSimilar } from './types'
 
 let publicClient: SupabaseClient | null = null
@@ -55,6 +56,10 @@ function asPositiveInteger(value: unknown, fallback: number, max: number) {
 
 function sanitizeSearchTerm(value: unknown) {
   return asText(value).replace(/[,%]/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+function isE2EMockEnabled() {
+  return process.env.E2E_MOCKS === '1'
 }
 
 // Imoveis
@@ -118,6 +123,10 @@ export async function getImoveis(filtros?: Record<string, unknown>) {
 }
 
 export async function getImovelById(id: string) {
+  if (isE2EMockEnabled() && id === e2eImovel.id) {
+    return e2eImovel
+  }
+
   const { data, error } = await getPublicClient()
     .from('imoveis')
     .select('*')
@@ -194,6 +203,10 @@ async function consultarSimilares(
 }
 
 export async function getImovelSimilares(imovel: Imovel): Promise<ImovelSimilar[]> {
+  if (isE2EMockEnabled() && imovel.id === e2eImovel.id) {
+    return e2eImoveisSimilares
+  }
+
   const grupos = await Promise.all([
     consultarSimilares(imovel, 'bairro', true),
     consultarSimilares(imovel, 'bairro', false),

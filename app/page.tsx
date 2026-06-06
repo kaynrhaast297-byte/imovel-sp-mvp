@@ -102,7 +102,7 @@ export default function Home() {
             </div>
             <div className="home-search-field">
               <span>Tipo</span>
-              <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })}>
+              <select aria-label="Tipo" value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })}>
                 <option value="">Todos</option>
                 <option value="apartamento">Apartamento</option>
                 <option value="casa">Casa</option>
@@ -112,7 +112,7 @@ export default function Home() {
             </div>
             <div className="home-search-field">
               <span>Negocio</span>
-              <select value={form.negocio} onChange={(event) => setForm({ ...form, negocio: event.target.value })}>
+              <select aria-label="Negocio" value={form.negocio} onChange={(event) => setForm({ ...form, negocio: event.target.value })}>
                 <option value="venda">Venda</option>
                 <option value="aluguel">Aluguel</option>
                 <option value="temporada">Temporada</option>
@@ -120,7 +120,7 @@ export default function Home() {
             </div>
             <div className="home-search-field">
               <span>Quartos</span>
-              <select value={form.quartos} onChange={(event) => setForm({ ...form, quartos: event.target.value })}>
+              <select aria-label="Quartos" value={form.quartos} onChange={(event) => setForm({ ...form, quartos: event.target.value })}>
                 <option value="">Qualquer</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>

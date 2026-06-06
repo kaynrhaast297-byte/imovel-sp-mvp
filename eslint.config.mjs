@@ -12,6 +12,7 @@ export default defineConfig([
   },
   globalIgnores([
     '.next/**',
+    'coverage/**',
     'out/**',
     'build/**',
     'next-env.d.ts',

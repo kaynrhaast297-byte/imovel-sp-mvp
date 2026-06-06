@@ -105,7 +105,9 @@ function BuscaConteudo() {
     router.push(`/busca?${params.toString()}`)
   }
 
-  const totalLabel = `${pagination.total} imovel${pagination.total !== 1 ? 'is' : ''} encontrado${pagination.total !== 1 ? 's' : ''}`
+  const totalLabel = pagination.total === 1
+    ? '1 imovel encontrado'
+    : `${pagination.total} imoveis encontrados`
 
   return (
     <div className="search-layout">
@@ -118,7 +120,7 @@ function BuscaConteudo() {
           </div>
           <div>
             <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Tipo</label>
-            <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+            <select aria-label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
               <option value="">Todos</option>
               <option value="apartamento">Apartamento</option>
               <option value="casa">Casa</option>
@@ -128,7 +130,7 @@ function BuscaConteudo() {
           </div>
           <div>
             <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Negocio</label>
-            <select value={form.negocio} onChange={(e) => setForm({ ...form, negocio: e.target.value })}>
+            <select aria-label="Negocio" value={form.negocio} onChange={(e) => setForm({ ...form, negocio: e.target.value })}>
               <option value="venda">Venda</option>
               <option value="aluguel">Aluguel</option>
               <option value="temporada">Temporada</option>
@@ -136,7 +138,7 @@ function BuscaConteudo() {
           </div>
           <div>
             <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Quartos minimos</label>
-            <select value={form.quartos} onChange={(e) => setForm({ ...form, quartos: e.target.value })}>
+            <select aria-label="Quartos minimos" value={form.quartos} onChange={(e) => setForm({ ...form, quartos: e.target.value })}>
               <option value="">Qualquer</option>
               <option value="1">1+</option>
               <option value="2">2+</option>
@@ -168,7 +170,7 @@ function BuscaConteudo() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             {form.bairro && <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>em <strong style={{ color: 'var(--text)' }}>{form.bairro}</strong></span>}
-            <select value={ordenacao} onChange={(event) => alterarOrdenacao(event.target.value)} style={{ width: 'auto', minWidth: '190px' }}>
+            <select aria-label="Ordenacao" value={ordenacao} onChange={(event) => alterarOrdenacao(event.target.value)} style={{ width: 'auto', minWidth: '190px' }}>
               <option value="recentes">Mais recentes</option>
               <option value="preco_m2_asc">Menor preco/m2</option>
               <option value="preco_asc">Menor preco total</option>
