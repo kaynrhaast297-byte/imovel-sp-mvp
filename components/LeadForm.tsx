@@ -73,6 +73,9 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
+      aria-busy={status === 'loading'}
+      aria-label="Formulario de contato"
+      className="lead-form"
       style={{
         background: 'var(--bg-card)',
         border: '1px solid var(--border)',
@@ -110,6 +113,9 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
 
       {feedback && (
         <div
+          role={status === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+          className="lead-feedback"
           style={{
             background: status === 'success' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
             borderRadius: 'var(--radius-sm)',
@@ -128,6 +134,7 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
         disabled={status === 'loading'}
         style={{ justifyContent: 'center', opacity: status === 'loading' ? 0.75 : 1 }}
       >
+        {status === 'loading' && <span className="button-spinner" aria-hidden="true" />}
         {status === 'loading' ? 'Enviando...' : 'Enviar contato'}
       </button>
     </form>
@@ -144,13 +151,13 @@ function LeadField({
   children: ReactNode
 }) {
   return (
-    <label style={{ display: 'block' }}>
-      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
+    <label className="lead-field">
+      <span className="lead-field-label">
         {label}
       </span>
       {children}
       {error && (
-        <span style={{ color: 'var(--danger)', display: 'block', fontSize: '0.78rem', marginTop: '0.25rem' }}>
+        <span className="lead-field-error">
           {error}
         </span>
       )}

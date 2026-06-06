@@ -12,7 +12,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 test.describe('Responsividade mobile', () => {
-  test.use({ viewport: { width: 390, height: 844 } })
+  test.use({ viewport: { width: 375, height: 812 } })
 
   let browserErrors: string[]
 

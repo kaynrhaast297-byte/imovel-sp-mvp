@@ -7,10 +7,12 @@ const expectedApiError = 'console.error: Failed to load resource: the server res
 test.describe('Busca avancada', () => {
   let browserErrors: string[]
   let apiShouldFail = false
+  let apiFailureExpected = false
 
   test.beforeEach(async ({ page }) => {
     browserErrors = watchBrowserErrors(page)
     apiShouldFail = false
+    apiFailureExpected = false
     await mockExternalAssets(page)
     await page.route('**/api/imoveis**', route =>
       route.fulfill(
@@ -29,9 +31,28 @@ test.describe('Busca avancada', () => {
 
   test.afterEach(async () => {
     const unexpectedErrors = browserErrors.filter(
-      error => !(apiShouldFail && error.startsWith(expectedApiError)),
+      error => !(apiFailureExpected && error.startsWith(expectedApiError)),
     )
     expectNoBrowserErrors(unexpectedErrors)
+  })
+
+  test('exibe skeletons de cards enquanto a busca esta carregando', async ({ page }) => {
+    await page.unroute('**/api/imoveis**')
+    let releaseResponse = () => {}
+    const responseGate = new Promise<void>((resolve) => {
+      releaseResponse = resolve
+    })
+
+    await page.route('**/api/imoveis**', async route => {
+      await responseGate
+      await route.fulfill({ status: 200, json: mockImoveisResponse })
+    })
+
+    await page.goto('/busca')
+
+    await expect(page.locator('.property-card-skeleton')).toHaveCount(6)
+    releaseResponse()
+    await expect(page.getByText('Apto Pinheiros', { exact: true })).toBeVisible()
   })
 
   test('aplica filtros combinados e atualiza todos os query params', async ({ page }) => {
@@ -98,14 +119,22 @@ test.describe('Busca avancada', () => {
 
     await expect(page.getByRole('heading', { name: '0 imoveis encontrados' })).toBeVisible()
     await expect(page.getByText('Nenhum imovel encontrado', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Limpar filtros' }).click()
+    await expect(page).toHaveURL(/\/busca\?page=1&per_page=12$/)
   })
 
-  test('exibe mensagem da API quando a busca falha', async ({ page }) => {
+  test('exibe mensagem da API e permite tentar novamente', async ({ page }) => {
     apiShouldFail = true
+    apiFailureExpected = true
 
     await gotoHydrated(page, '/busca?bairro=Pinheiros')
 
+    await expect(page.getByRole('heading', { name: 'Nao foi possivel carregar os imoveis' })).toBeVisible()
     await expect(page.getByText('Falha controlada na busca.', { exact: true })).toBeVisible()
     await expect(page.getByText('Tente novamente em alguns instantes.', { exact: true })).toBeVisible()
+
+    apiShouldFail = false
+    await page.getByRole('button', { name: 'Tentar novamente' }).click()
+    await expect(page.getByText('Apto Pinheiros', { exact: true })).toBeVisible()
   })
 })

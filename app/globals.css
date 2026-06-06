@@ -147,9 +147,15 @@ select option {
   50% { opacity: 0.5; }
 }
 .skeleton {
-  background: var(--bg-elevated);
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, #293248 50%, var(--bg-elevated) 100%);
+  background-size: 200% 100%;
   border-radius: var(--radius-sm);
-  animation: pulse-slow 1.5s ease infinite;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }
 
 /* Home premium */
@@ -593,12 +599,158 @@ select option {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1rem;
+  min-width: 0;
 }
 
-.search-empty {
-  text-align: center;
-  padding: 4rem 1rem;
+.search-state {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
   color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.search-state-error {
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.search-state-kicker {
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.search-state-error .search-state-kicker {
+  color: #fca5a5;
+}
+
+.search-state h2 {
+  color: var(--text);
+  font-family: var(--font-dm-serif);
+  font-size: 1.65rem;
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+
+.search-state p {
+  max-width: 500px;
+}
+
+.search-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.property-card-skeleton {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.skeleton-media {
+  height: 160px;
+  margin-bottom: 1rem;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
+}
+
+.skeleton-pill {
+  height: 22px;
+  width: 88px;
+  border-radius: 999px;
+}
+
+.skeleton-pill-short {
+  width: 62px;
+}
+
+.skeleton-line {
+  height: 12px;
+  margin-bottom: 0.65rem;
+  width: 100%;
+}
+
+.skeleton-line-title {
+  height: 18px;
+  width: 78%;
+}
+
+.skeleton-line-short {
+  width: 52%;
+}
+
+.skeleton-line-price {
+  height: 24px;
+  margin-top: 1.25rem;
+  width: 42%;
+}
+
+.property-card-link,
+.property-card {
+  display: block;
+  min-width: 0;
+}
+
+.property-card p {
+  overflow-wrap: anywhere;
+}
+
+.property-card-footer {
+  flex-wrap: wrap;
+}
+
+.lead-field {
+  display: block;
+}
+
+.lead-field-label {
+  color: var(--text);
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.lead-field-error {
+  color: var(--danger);
+  display: block;
+  font-size: 0.78rem;
+  margin-top: 0.25rem;
+}
+
+.lead-feedback {
+  line-height: 1.45;
+}
+
+.button-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: button-spin 0.7s linear infinite;
+}
+
+@keyframes button-spin {
+  to { transform: rotate(360deg); }
 }
 
 .pagination {
@@ -860,6 +1012,13 @@ select option {
     padding: 1rem 0.75rem 2rem;
   }
 
+  .search-layout > *,
+  .search-header > *,
+  .search-sidebar,
+  .search-results-grid {
+    min-width: 0;
+  }
+
   .search-header,
   .pagination {
     align-items: stretch;
@@ -883,5 +1042,35 @@ select option {
   .ai-form button {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .search-sidebar,
+  .property-card,
+  .property-card-skeleton {
+    padding: 1rem !important;
+  }
+
+  .search-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .search-state {
+    min-height: 280px;
+    padding: 2.25rem 0.9rem;
+  }
+
+  .search-state-actions,
+  .search-state-actions .btn {
+    width: 100%;
+  }
+
+  .search-state-actions .btn {
+    justify-content: center;
+  }
+
+  .property-card-footer > div:last-child {
+    text-align: left !important;
   }
 }
