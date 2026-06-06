@@ -24,6 +24,7 @@ function BuscaConteudo() {
   const [pagination, setPagination] = useState<Pagination>(emptyPagination)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState('')
+  const [retryToken, setRetryToken] = useState(0)
   const ordenacao = searchParams.get('ordenacao') ?? 'recentes'
   const [form, setForm] = useState({
     bairro: searchParams.get('bairro') ?? '',
@@ -71,7 +72,7 @@ function BuscaConteudo() {
     return () => {
       ativo = false
     }
-  }, [queryString])
+  }, [queryString, retryToken])
 
   function aplicarFiltros() {
     const params = new URLSearchParams()
@@ -103,6 +104,17 @@ function BuscaConteudo() {
     params.set('page', String(page))
     params.set('per_page', String(PER_PAGE))
     router.push(`/busca?${params.toString()}`)
+  }
+
+  function limparFiltros() {
+    setForm({
+      bairro: '',
+      tipo: '',
+      negocio: 'venda',
+      quartos: '',
+      preco_max: '',
+    })
+    router.push(`/busca?page=1&per_page=${PER_PAGE}`)
   }
 
   const totalLabel = pagination.total === 1
@@ -180,21 +192,46 @@ function BuscaConteudo() {
         </div>
 
         {loading ? (
-          <div className="search-results-grid">
+          <div className="search-results-grid" aria-label="Carregando imoveis">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height: '320px', borderRadius: 'var(--radius)' }} />
+              <article key={i} className="property-card-skeleton" aria-hidden="true">
+                <div className="skeleton skeleton-media" />
+                <div className="skeleton-row">
+                  <div className="skeleton skeleton-pill" />
+                  <div className="skeleton skeleton-pill skeleton-pill-short" />
+                </div>
+                <div className="skeleton skeleton-line skeleton-line-title" />
+                <div className="skeleton skeleton-line skeleton-line-short" />
+                <div className="skeleton skeleton-line" />
+                <div className="skeleton skeleton-line skeleton-line-price" />
+              </article>
             ))}
           </div>
         ) : erro ? (
-          <div className="search-empty">
-            <p style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--danger)' }}>{erro}</p>
-            <p style={{ fontSize: '0.875rem' }}>Tente novamente em alguns instantes.</p>
+          <div className="search-state search-state-error" role="alert">
+            <span className="search-state-kicker">Busca indisponivel</span>
+            <h2>Nao foi possivel carregar os imoveis</h2>
+            <p>{erro}</p>
+            <p>Tente novamente em alguns instantes.</p>
+            <div className="search-state-actions">
+              <button className="btn btn-primary" onClick={() => setRetryToken((token) => token + 1)}>
+                Tentar novamente
+              </button>
+              <button className="btn btn-ghost" onClick={limparFiltros}>
+                Limpar filtros
+              </button>
+            </div>
           </div>
         ) : imoveis.length === 0 ? (
-          <div className="search-empty">
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>Casa</div>
-            <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Nenhum imovel encontrado</p>
-            <p style={{ fontSize: '0.875rem' }}>Tente ajustar os filtros ou buscar em outro bairro.</p>
+          <div className="search-state">
+            <span className="search-state-kicker">Sem resultados</span>
+            <h2>Nenhum imovel encontrado</h2>
+            <p>Tente ajustar os filtros ou buscar em outro bairro.</p>
+            <div className="search-state-actions">
+              <button className="btn btn-primary" onClick={limparFiltros}>
+                Limpar filtros
+              </button>
+            </div>
           </div>
         ) : (
           <>

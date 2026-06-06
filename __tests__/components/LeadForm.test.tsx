@@ -19,6 +19,10 @@ describe('LeadForm', () => {
     renderLeadForm()
 
     expect(screen.getByText('Quero saber mais')).toBeInTheDocument()
+    expect(screen.getByText('Nome', { exact: true })).toBeVisible()
+    expect(screen.getByText('Telefone', { exact: true })).toBeVisible()
+    expect(screen.getByText('Email', { exact: true })).toBeVisible()
+    expect(screen.getByText('Mensagem', { exact: true })).toBeVisible()
     expect(screen.getByLabelText(/nome/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
@@ -69,6 +73,30 @@ describe('LeadForm', () => {
       imovel_id: '550e8400-e29b-41d4-a716-446655440000',
       origem: 'pagina_imovel',
     })
+  })
+
+  it('desabilita o botao e mostra Enviando durante a requisicao', async () => {
+    const user = userEvent.setup()
+    let resolveRequest: (value: unknown) => void = () => {}
+    mockFetch.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveRequest = resolve
+    }))
+
+    renderLeadForm()
+
+    await user.type(screen.getByLabelText(/nome/i), 'Maria Silva')
+    await user.type(screen.getByLabelText(/telefone/i), '11999999999')
+    await user.click(screen.getByRole('button', { name: /enviar contato/i }))
+
+    expect(screen.getByRole('button', { name: /enviando/i })).toBeDisabled()
+    expect(screen.getByRole('form')).toHaveAttribute('aria-busy', 'true')
+
+    resolveRequest({
+      ok: true,
+      json: async () => ({ ok: true }),
+    })
+
+    expect(await screen.findByText(/contato enviado/i)).toBeInTheDocument()
   })
 
   it('mostra erro retornado pela API', async () => {

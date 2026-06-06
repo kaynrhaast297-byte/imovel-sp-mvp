@@ -17,8 +17,8 @@ export default function ImovelCard({ imovel }: Props) {
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
 
   return (
-    <Link href={`/imovel/${imovel.id}`} style={{ textDecoration: 'none' }}>
-      <div className="card" style={{ padding: '1.25rem', cursor: 'pointer', height: '100%' }}>
+    <Link className="property-card-link" href={`/imovel/${imovel.id}`} style={{ textDecoration: 'none' }}>
+      <div className="card property-card" style={{ padding: '1.25rem', cursor: 'pointer', height: '100%' }}>
         <div className="property-card-media">
           {mediaLabel(imovel.tipo)}
         </div>
@@ -47,7 +47,7 @@ export default function ImovelCard({ imovel }: Props) {
           {imovel.vagas != null && <span>{imovel.vagas} vaga{imovel.vagas !== 1 ? 's' : ''}</span>}
         </div>
 
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem' }}>
+        <div className="property-card-footer" style={{ borderTop: '1px solid var(--border)', paddingTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text)' }}>
               {formatarPreco(imovel.preco)}
