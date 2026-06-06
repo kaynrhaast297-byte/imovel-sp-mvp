@@ -95,7 +95,7 @@ npm run test:e2e:ui
 npm run test:e2e:report
 ```
 
-O relatorio HTML e gerado em `playwright-report/`. No CI, os testes E2E usam dois workers em paralelo e o relatorio fica disponivel como artefato por 14 dias.
+O relatorio HTML e gerado em `playwright-report/`. No CI, os testes funcionais rodam no Ubuntu com dois workers, enquanto os snapshots visuais rodam no Windows, ambiente em que os baselines foram gerados. Os relatorios ficam disponiveis como artefatos por 14 dias.
 
 ## IA local com Ollama
 
@@ -129,7 +129,7 @@ O workflow `.github/workflows/ci.yml` roda em pushes e pull requests para `maste
 - `npm run lint`
 - `npm run type-check`
 - `npm run build`
-- `npm run test:e2e` com relatorio HTML e execucao paralela
+- `npm run test:e2e` com relatorio HTML, execucao paralela no Ubuntu e snapshots visuais no Windows
 
 ## Proximos passos
 
