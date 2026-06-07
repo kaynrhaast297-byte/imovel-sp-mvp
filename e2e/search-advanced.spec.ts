@@ -121,6 +121,7 @@ test.describe('Busca avancada', () => {
     await expect(page.getByText('Nenhum imovel encontrado', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Limpar filtros' }).click()
     await expect(page).toHaveURL(/\/busca\?page=1&per_page=12$/)
+    await expect(page.getByRole('heading', { name: '0 imoveis encontrados' })).toBeVisible()
   })
 
   test('exibe mensagem da API e permite tentar novamente', async ({ page }) => {

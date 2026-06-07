@@ -91,6 +91,29 @@ describe('PUT /api/imoveis/[id]', () => {
     expect(mocks.updateImovel).toHaveBeenCalledWith('imovel-1', { preco: 950000 })
   })
 
+  it('rejeita update vazio ou com campos protegidos', async () => {
+    const empty = await PUT(makeRequest('PUT', {}), params())
+    const protectedField = await PUT(makeRequest('PUT', { id: 'outro-id' }), params())
+
+    expect(empty.status).toBe(400)
+    expect(protectedField.status).toBe(400)
+    expect(await protectedField.json()).toEqual({ error: 'Dados do imovel invalidos.' })
+    expect(mocks.updateImovel).not.toHaveBeenCalled()
+  })
+
+  it('rejeita JSON malformado no update', async () => {
+    const req = new NextRequest('http://localhost/api/imoveis/imovel-1', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{',
+    })
+
+    const res = await PUT(req, params())
+
+    expect(res.status).toBe(400)
+    expect(mocks.updateImovel).not.toHaveBeenCalled()
+  })
+
   it('retorna 500 quando a atualizacao falha', async () => {
     mocks.updateImovel.mockRejectedValueOnce(new Error('update falhou'))
 
@@ -98,8 +121,7 @@ describe('PUT /api/imoveis/[id]', () => {
     const json = await res.json()
 
     expect(res.status).toBe(500)
-    expect(json.error).toBe('Erro ao atualizar')
-    expect(json.detail).toMatch(/update falhou/i)
+    expect(json).toEqual({ error: 'Erro ao atualizar' })
   })
 })
 
@@ -140,7 +162,6 @@ describe('DELETE /api/imoveis/[id]', () => {
     const json = await res.json()
 
     expect(res.status).toBe(500)
-    expect(json.error).toBe('Erro ao deletar')
-    expect(json.detail).toMatch(/delete falhou/i)
+    expect(json).toEqual({ error: 'Erro ao deletar' })
   })
 })

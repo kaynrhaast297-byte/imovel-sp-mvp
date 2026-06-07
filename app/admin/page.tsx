@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 type Campo = {
   key: string
@@ -38,10 +38,19 @@ export default function AdminPage() {
   const [form, setForm] = useState<Record<string, string>>(FORM_INICIAL)
   const [adminToken, setAdminToken] = useState('')
   const [desbloqueado, setDesbloqueado] = useState(false)
+  const [verificandoSessao, setVerificandoSessao] = useState(true)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [msg, setMsg] = useState('')
 
-  function desbloquear(e: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    fetch('/api/admin/session')
+      .then(res => res.json())
+      .then(data => setDesbloqueado(data?.authenticated === true))
+      .catch(() => setDesbloqueado(false))
+      .finally(() => setVerificandoSessao(false))
+  }, [])
+
+  async function desbloquear(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const token = adminToken.trim()
     if (!token) {
@@ -50,13 +59,27 @@ export default function AdminPage() {
       return
     }
 
-    setAdminToken(token)
-    setDesbloqueado(true)
-    setStatus('idle')
-    setMsg('')
+    setStatus('loading')
+    try {
+      const res = await fetch('/api/admin/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      })
+      if (!res.ok) throw new Error('Token de admin invalido.')
+
+      setAdminToken('')
+      setDesbloqueado(true)
+      setStatus('idle')
+      setMsg('')
+    } catch (error) {
+      setStatus('error')
+      setMsg(error instanceof Error ? error.message : 'Nao foi possivel autenticar.')
+    }
   }
 
-  function bloquear() {
+  async function bloquear() {
+    await fetch('/api/admin/session', { method: 'DELETE' }).catch(() => null)
     setAdminToken('')
     setDesbloqueado(false)
     setStatus('idle')
@@ -87,10 +110,7 @@ export default function AdminPage() {
 
       const res = await fetch('/api/imoveis', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
@@ -106,6 +126,14 @@ export default function AdminPage() {
       setStatus('error')
       setMsg(error instanceof Error ? error.message : 'Erro ao salvar. Verifique o Supabase.')
     }
+  }
+
+  if (verificandoSessao) {
+    return (
+      <div style={{ maxWidth: '440px', margin: '0 auto', padding: '3rem 1.5rem' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Verificando sessao administrativa...</p>
+      </div>
+    )
   }
 
   if (!desbloqueado) {
@@ -128,10 +156,11 @@ export default function AdminPage() {
           }}
         >
           <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+            <label htmlFor="admin-token" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
               Token de admin
             </label>
             <input
+              id="admin-token"
               type="password"
               value={adminToken}
               onChange={(e) => setAdminToken(e.target.value)}
@@ -144,7 +173,7 @@ export default function AdminPage() {
           )}
 
           <button className="btn btn-primary" type="submit" style={{ justifyContent: 'center' }}>
-            Entrar
+            {status === 'loading' ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>
@@ -178,16 +207,17 @@ export default function AdminPage() {
       }}>
         {CAMPOS.map((campo) => (
           <div key={campo.key} style={{ gridColumn: campo.span === 2 ? '1 / -1' : undefined }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+            <label htmlFor={`admin-${campo.key}`} style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
               {campo.label}{campo.required && <span style={{ color: 'var(--danger)' }}> *</span>}
             </label>
             {campo.type === 'select' ? (
-              <select value={form[campo.key] ?? ''} onChange={(e) => setForm({ ...form, [campo.key]: e.target.value })}>
+              <select id={`admin-${campo.key}`} value={form[campo.key] ?? ''} onChange={(e) => setForm({ ...form, [campo.key]: e.target.value })}>
                 <option value="">Selecione</option>
                 {campo.options?.map((option) => <option key={option} value={option}>{option}</option>)}
               </select>
             ) : campo.type === 'textarea' ? (
               <textarea
+                id={`admin-${campo.key}`}
                 rows={3}
                 value={form[campo.key] ?? ''}
                 onChange={(e) => setForm({ ...form, [campo.key]: e.target.value })}
@@ -195,6 +225,7 @@ export default function AdminPage() {
               />
             ) : (
               <input
+                id={`admin-${campo.key}`}
                 type={campo.type}
                 value={form[campo.key] ?? ''}
                 onChange={(e) => setForm({ ...form, [campo.key]: e.target.value })}

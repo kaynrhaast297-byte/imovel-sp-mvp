@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { mockImoveisResponse } from './fixtures'
 import { expectNoBrowserErrors, gotoHydrated, mockExternalAssets, watchBrowserErrors } from './helpers'
 
 test.describe('Home', () => {
@@ -7,6 +8,9 @@ test.describe('Home', () => {
   test.beforeEach(async ({ page }) => {
     browserErrors = watchBrowserErrors(page)
     await mockExternalAssets(page)
+    await page.route('**/api/imoveis**', route =>
+      route.fulfill({ status: 200, json: mockImoveisResponse }),
+    )
   })
 
   test.afterEach(async () => {
@@ -33,5 +37,6 @@ test.describe('Home', () => {
 
     await expect(page).toHaveURL(/\/busca\?.*bairro=Pinheiros/)
     await expect(page).toHaveURL(/\/busca\?.*negocio=venda/)
+    await expect(page.getByText('Apto Pinheiros', { exact: true })).toBeVisible()
   })
 })

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { internalServerError, invalidRequest } from '@/lib/api-response'
 import { createImovel, getImoveis } from '@/lib/supabase'
+import { imovelCreateSchema } from '@/lib/validation'
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,7 +23,7 @@ export async function GET(req: NextRequest) {
     const result = await getImoveis(filtros)
     return NextResponse.json(result)
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao buscar imoveis', detail: String(err) }, { status: 500 })
+    return internalServerError('Erro ao buscar imoveis', err)
   }
 }
 
@@ -30,15 +32,17 @@ export async function POST(req: NextRequest) {
   if (unauthorized) return unauthorized
 
   try {
-    const body = await req.json()
+    const parsed = imovelCreateSchema.safeParse(await req.json().catch(() => null))
+    if (!parsed.success) return invalidRequest('Dados do imovel invalidos.')
+
     const imovel = await createImovel({
-      ...body,
+      ...parsed.data,
       status: 'ativo',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     return NextResponse.json({ imovel }, { status: 201 })
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao criar imovel', detail: String(err) }, { status: 500 })
+    return internalServerError('Erro ao criar imovel', err)
   }
 }

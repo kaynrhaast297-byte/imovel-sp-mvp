@@ -99,6 +99,7 @@ grant select, insert, update, delete on public.imoveis to service_role;
 grant select, insert, update, delete on public.historico_precos to service_role;
 grant select, insert, update, delete on public.alertas_preco to service_role;
 grant select, insert, update, delete on public.leads to service_role;
+revoke all privileges on public.leads from anon, authenticated;
 
 drop policy if exists "Leitura publica de imoveis ativos" on imoveis;
 drop policy if exists "Insert via service role" on imoveis;
@@ -137,9 +138,4 @@ create policy "Leads escrita via service role"
   on leads for all
   to service_role
   using (true)
-  with check (true);
-
-create policy "Permitir envio publico de leads"
-  on leads for insert
-  to anon
   with check (true);

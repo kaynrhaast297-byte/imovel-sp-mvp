@@ -18,6 +18,17 @@ vi.mock('@/lib/supabase', () => ({
 
 const { GET, POST } = await import('@/app/api/imoveis/route')
 
+const validImovel = {
+  titulo: 'Novo imovel',
+  tipo: 'apartamento',
+  negocio: 'venda',
+  preco: 900000,
+  area_m2: 90,
+  bairro: 'Pinheiros',
+  cidade: 'Sao Paulo',
+  estado: 'sp',
+}
+
 function makeJsonRequest(body: unknown) {
   return new NextRequest('http://localhost/api/imoveis', {
     method: 'POST',
@@ -68,8 +79,7 @@ describe('GET /api/imoveis', () => {
     const json = await res.json()
 
     expect(res.status).toBe(500)
-    expect(json.error).toBe('Erro ao buscar imoveis')
-    expect(json.detail).toMatch(/falha no banco/i)
+    expect(json).toEqual({ error: 'Erro ao buscar imoveis' })
   })
 })
 
@@ -96,28 +106,56 @@ describe('POST /api/imoveis', () => {
     const imovelCriado = { id: 'imovel-1', titulo: 'Novo imovel', status: 'ativo' }
     mocks.createImovel.mockResolvedValueOnce(imovelCriado)
 
-    const res = await POST(makeJsonRequest({ titulo: 'Novo imovel', preco: 900000 }))
+    const res = await POST(makeJsonRequest(validImovel))
     const json = await res.json()
 
     expect(res.status).toBe(201)
     expect(json.imovel).toEqual(imovelCriado)
     expect(mocks.createImovel).toHaveBeenCalledWith({
       titulo: 'Novo imovel',
+      tipo: 'apartamento',
+      negocio: 'venda',
       preco: 900000,
+      area_m2: 90,
+      bairro: 'Pinheiros',
+      cidade: 'Sao Paulo',
+      estado: 'SP',
       status: 'ativo',
       created_at: expect.any(String),
       updated_at: expect.any(String),
     })
   })
 
+  it('rejeita campos ausentes ou nao permitidos', async () => {
+    const missingRequired = await POST(makeJsonRequest({ titulo: 'Incompleto' }))
+    const unknownField = await POST(makeJsonRequest({ ...validImovel, admin: true }))
+
+    expect(missingRequired.status).toBe(400)
+    expect(unknownField.status).toBe(400)
+    expect(await unknownField.json()).toEqual({ error: 'Dados do imovel invalidos.' })
+    expect(mocks.createImovel).not.toHaveBeenCalled()
+  })
+
+  it('rejeita JSON malformado', async () => {
+    const req = new NextRequest('http://localhost/api/imoveis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{',
+    })
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(400)
+    expect(mocks.createImovel).not.toHaveBeenCalled()
+  })
+
   it('retorna 500 quando a criacao falha', async () => {
     mocks.createImovel.mockRejectedValueOnce(new Error('insert falhou'))
 
-    const res = await POST(makeJsonRequest({ titulo: 'Novo imovel' }))
+    const res = await POST(makeJsonRequest(validImovel))
     const json = await res.json()
 
     expect(res.status).toBe(500)
-    expect(json.error).toBe('Erro ao criar imovel')
-    expect(json.detail).toMatch(/insert falhou/i)
+    expect(json).toEqual({ error: 'Erro ao criar imovel' })
   })
 })

@@ -7,6 +7,13 @@ const host = process.env.PLAYWRIGHT_HOST ?? 'localhost'
 const port = process.env.PORT ?? '3000'
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://${host}:${port}`
 const timeoutMs = 120_000
+const e2eAdminToken = process.env.E2E_ADMIN_TOKEN ?? 'e2e-admin-token'
+const e2eEnv = {
+  ...process.env,
+  E2E_ADMIN_TOKEN: e2eAdminToken,
+  E2E_MOCKS: '1',
+  IMOVEL_ADMIN_TOKEN: e2eAdminToken,
+}
 
 if (!existsSync('.next/BUILD_ID')) {
   console.error('Build de producao nao encontrado. Rode npm run build antes de npm run test:e2e.')
@@ -48,8 +55,7 @@ function runPlaywright(args) {
       {
         stdio: 'inherit',
         env: {
-          ...process.env,
-          E2E_MOCKS: '1',
+          ...e2eEnv,
           PLAYWRIGHT_BASE_URL: baseURL,
           PLAYWRIGHT_EXTERNAL_SERVER: '1',
         },
@@ -89,7 +95,7 @@ try {
     serverProcess = spawn(
       process.execPath,
       ['node_modules/next/dist/bin/next', 'start', '--hostname', host, '--port', port],
-      { stdio: 'inherit', env: { ...process.env, E2E_MOCKS: '1' } },
+      { stdio: 'inherit', env: e2eEnv },
     )
 
     await waitForServer(serverProcess)

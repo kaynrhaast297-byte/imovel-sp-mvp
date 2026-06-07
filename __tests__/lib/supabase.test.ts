@@ -201,13 +201,14 @@ describe('lib/supabase', () => {
     const createQuery = makeQuery({ data: null, error: createError })
     const updateQuery = makeQuery({ data: null, error: updateError })
     const deleteQuery = makeQuery({ error: deleteError })
-    const { createLead, createImovel, updateImovel, deleteImovel } = await loadSupabase(
-      [leadQuery],
-      [createQuery, updateQuery, deleteQuery],
+    const { createLead, createImovel, updateImovel, deleteImovel, adminClient } = await loadSupabase(
+      [],
+      [leadQuery, createQuery, updateQuery, deleteQuery],
     )
 
     await expect(createLead({ nome: 'Maria' })).resolves.toEqual({ ok: true })
     expect(leadQuery.insert).toHaveBeenCalledWith({ nome: 'Maria' })
+    expect(adminClient.from).toHaveBeenCalledWith('leads')
     await expect(createImovel({ titulo: 'Falha' })).rejects.toBe(createError)
     await expect(updateImovel('id', { preco: 1 })).rejects.toBe(updateError)
     await expect(deleteImovel('id')).rejects.toBe(deleteError)

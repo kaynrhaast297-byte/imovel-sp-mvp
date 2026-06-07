@@ -168,7 +168,7 @@ export async function deleteImovel(id: string) {
 // Leads
 
 export async function createLead(lead: Record<string, unknown>) {
-  const { error } = await getPublicClient()
+  const { error } = await getAdminClient()
     .from('leads')
     .insert(lead)
   if (error) throw error

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { internalServerError } from '@/lib/api-response'
 import { getImovelById, getImovelSimilares } from '@/lib/supabase'
 import { calcularAnalise } from '@/lib/utils'
 
@@ -13,6 +14,6 @@ export async function GET(req: NextRequest) {
     const analise = calcularAnalise(imovel, similares)
     return NextResponse.json({ analise })
   } catch (err) {
-    return NextResponse.json({ error: 'Erro na analise', detail: String(err) }, { status: 500 })
+    return internalServerError('Erro na analise', err)
   }
 }

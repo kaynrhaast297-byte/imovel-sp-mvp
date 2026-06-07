@@ -54,7 +54,6 @@ describe('GET /api/analise', () => {
     const json = await response.json()
 
     expect(response.status).toBe(500)
-    expect(json.error).toBe('Erro na analise')
-    expect(json.detail).toMatch(/banco indisponivel/i)
+    expect(json).toEqual({ error: 'Erro na analise' })
   })
 })

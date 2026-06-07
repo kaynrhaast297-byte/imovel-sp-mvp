@@ -1,24 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
+import { internalServerError, invalidRequest } from '@/lib/api-response'
+import { checkRateLimit, getClientIp, getLeadRateLimitOptions } from '@/lib/rate-limit'
 import { createLead } from '@/lib/supabase'
-
-const leadSchema = z.object({
-  imovel_id: z.string().uuid(),
-  nome: z.string().trim().min(2).max(120),
-  telefone: z.string().trim().min(8).max(40),
-  email: z.string().trim().email().max(160).optional().or(z.literal('')),
-  mensagem: z.string().trim().min(10).max(1200),
-  origem: z.string().trim().max(80).optional(),
-})
+import { leadSchema } from '@/lib/validation'
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const parsed = leadSchema.safeParse(body)
-
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Dados de contato invalidos.' }, { status: 400 })
+    const limit = checkRateLimit(getClientIp(req), getLeadRateLimitOptions())
+    if (!limit.allowed) {
+      const retryAfter = Math.max(Math.ceil((limit.resetAt - Date.now()) / 1000), 1)
+      return NextResponse.json(
+        { error: 'Muitas tentativas. Aguarde antes de enviar novamente.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfter),
+            'X-RateLimit-Limit': String(limit.limit),
+            'X-RateLimit-Remaining': String(limit.remaining),
+          },
+        },
+      )
     }
+
+    const parsed = leadSchema.safeParse(await req.json().catch(() => null))
+    if (!parsed.success) return invalidRequest('Dados de contato invalidos.')
 
     await createLead({
       ...parsed.data,
@@ -30,6 +35,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true }, { status: 201 })
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao salvar contato.', detail: String(err) }, { status: 500 })
+    return internalServerError('Erro ao salvar contato.', err)
   }
 }

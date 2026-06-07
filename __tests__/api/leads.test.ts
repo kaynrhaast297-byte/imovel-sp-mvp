@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
+import { resetRateLimits } from '@/lib/rate-limit'
 
 const mocks = vi.hoisted(() => ({
   createLead: vi.fn(),
@@ -31,6 +32,9 @@ const validLead = {
 describe('POST /api/leads', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    resetRateLimits()
+    delete process.env.LEAD_RATE_LIMIT_MAX
+    delete process.env.LEAD_RATE_LIMIT_WINDOW_MS
   })
 
   it('retorna 400 quando os dados sao invalidos', async () => {
@@ -39,6 +43,27 @@ describe('POST /api/leads', () => {
 
     expect(res.status).toBe(400)
     expect(json.error).toBe('Dados de contato invalidos.')
+    expect(mocks.createLead).not.toHaveBeenCalled()
+  })
+
+  it('rejeita campos extras para impedir escrita arbitraria', async () => {
+    const res = await POST(makeRequest({ ...validLead, status: 'fechado' }))
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'Dados de contato invalidos.' })
+    expect(mocks.createLead).not.toHaveBeenCalled()
+  })
+
+  it('rejeita JSON malformado', async () => {
+    const req = new NextRequest('http://localhost/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{',
+    })
+
+    const res = await POST(req)
+
+    expect(res.status).toBe(400)
     expect(mocks.createLead).not.toHaveBeenCalled()
   })
 
@@ -82,7 +107,22 @@ describe('POST /api/leads', () => {
     const json = await res.json()
 
     expect(res.status).toBe(500)
-    expect(json.error).toBe('Erro ao salvar contato.')
-    expect(json.detail).toMatch(/insert falhou/i)
+    expect(json).toEqual({ error: 'Erro ao salvar contato.' })
+  })
+
+  it('limita tentativas repetidas por IP', async () => {
+    process.env.LEAD_RATE_LIMIT_MAX = '1'
+    mocks.createLead.mockResolvedValue({ ok: true })
+
+    const first = await POST(makeRequest(validLead))
+    const limited = await POST(makeRequest(validLead))
+
+    expect(first.status).toBe(201)
+    expect(limited.status).toBe(429)
+    expect(limited.headers.get('Retry-After')).toMatch(/^\d+$/)
+    expect(await limited.json()).toEqual({
+      error: 'Muitas tentativas. Aguarde antes de enviar novamente.',
+    })
+    expect(mocks.createLead).toHaveBeenCalledTimes(1)
   })
 })

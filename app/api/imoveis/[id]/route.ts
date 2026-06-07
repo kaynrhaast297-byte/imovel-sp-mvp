@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { internalServerError, invalidRequest } from '@/lib/api-response'
 import { deleteImovel, getImovelById, updateImovel } from '@/lib/supabase'
+import { imovelUpdateSchema } from '@/lib/validation'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -18,11 +20,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     const { id } = await params
-    const body = await req.json()
-    const imovel = await updateImovel(id, body)
+    const parsed = imovelUpdateSchema.safeParse(await req.json().catch(() => null))
+    if (!parsed.success) return invalidRequest('Dados do imovel invalidos.')
+
+    const imovel = await updateImovel(id, parsed.data)
     return NextResponse.json({ imovel })
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao atualizar', detail: String(err) }, { status: 500 })
+    return internalServerError('Erro ao atualizar', err)
   }
 }
 
@@ -35,6 +39,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await deleteImovel(id)
     return NextResponse.json({ ok: true })
   } catch (err) {
-    return NextResponse.json({ error: 'Erro ao deletar', detail: String(err) }, { status: 500 })
+    return internalServerError('Erro ao deletar', err)
   }
 }
