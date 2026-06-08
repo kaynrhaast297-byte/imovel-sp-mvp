@@ -10,6 +10,12 @@ export default defineConfig([
       '@next/next/no-page-custom-font': 'off',
     },
   },
+  {
+    files: ['scripts/*.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
   globalIgnores([
     '.next/**',
     'coverage/**',
