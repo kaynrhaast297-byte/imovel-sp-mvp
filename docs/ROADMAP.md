@@ -27,11 +27,11 @@ Cadastrar 1 imovel real perfeitamente.
 | Ordem | Entrega | Branch | Status |
 |---|---|---|---|
 | 1 | Finalizar e revisar seguranca | `feature/security-tests` | Concluido - CI verde |
-| 2 | Criar AI Quality Lab | `feature/ai-quality-lab` | Em finalizacao |
-| 3 | Criar bucket `property-images` | `feature/property-data` | Apos merge do Lab |
-| 4 | Expandir schema real dos imoveis | `feature/property-data` | Pendente |
-| 5 | Admin com upload multiplo e preview | `feature/property-data` | Pendente |
-| 6 | Geocodificacao ViaCEP + Nominatim | `feature/property-data` | Pendente |
+| 2 | Criar AI Quality Lab | `feature/ai-quality-lab` | Concluido |
+| 3 | Criar bucket `property-images` | `feature/property-data` | Implementado localmente |
+| 4 | Expandir schema real dos imoveis | `feature/property-data` | Implementado localmente |
+| 5 | Admin com upload multiplo e preview | `feature/property-data` | Implementado |
+| 6 | Geocodificacao ViaCEP + Nominatim | `feature/property-data` | Implementado |
 | 7 | Cadastrar 1 imovel real completo | Manual | Pendente |
 | 8 | Criar detalhe com galeria e mapa | `feature/property-experience` | Pendente |
 

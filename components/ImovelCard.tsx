@@ -15,12 +15,18 @@ function mediaLabel(tipo: string) {
 
 export default function ImovelCard({ imovel }: Props) {
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
+  const foto = imovel.foto_principal || imovel.fotos?.[0]
 
   return (
     <Link className="property-card-link" href={`/imovel/${imovel.id}`} style={{ textDecoration: 'none' }}>
       <div className="card property-card" style={{ padding: '1.25rem', cursor: 'pointer', height: '100%' }}>
-        <div className="property-card-media">
-          {mediaLabel(imovel.tipo)}
+        <div
+          className="property-card-media"
+          role={foto ? 'img' : undefined}
+          aria-label={foto ? `Foto principal de ${imovel.titulo}` : undefined}
+          style={foto ? { backgroundImage: `url("${foto}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+        >
+          {!foto && mediaLabel(imovel.tipo)}
         </div>
 
         <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>

@@ -14,6 +14,8 @@ Comparador de precos de imoveis em Sao Paulo. A ideia central do MVP e ajudar o 
 - Analise de preco com comparacao por imoveis similares
 - Formulario de contato do imovel com validacao
 - Painel admin para cadastro manual com sessao HttpOnly
+- Cadastro completo com CEP, coordenadas e fotos
+- Upload server-side para Supabase Storage com foto principal
 - API REST para leitura/escrita de imoveis e criacao de leads
 - Supabase com RLS para leitura publica e escrita administrativa
 
@@ -61,6 +63,8 @@ Os limites de login e leads funcionam por IP e por processo do Next.js. Eles sao
 O estado base do banco esta documentado em `supabase_schema.sql`. Mudancas incrementais ficam versionadas em `supabase/migrations/`.
 
 O schema atual habilita RLS nas tabelas publicas, permite leitura anonima apenas de imoveis ativos, cria a tabela de leads, adiciona indices para busca/paginacao e reserva toda escrita para o backend usando chave server-side. As migrations de seguranca que restringem leads e a funcao automatica de RLS ja foram aplicadas ao projeto remoto.
+
+A migration `supabase/migrations/20260608185118_property_data_storage.sql` adiciona endereco completo e cria o bucket publico `property-images`. O bucket aceita JPEG, PNG e WebP de ate 5 MB; escrita e remocao continuam exclusivas do backend. Revise `docs/PROPERTY_DATA_RUNBOOK.md` antes de aplicar em producao.
 
 ## Scripts
 

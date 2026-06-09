@@ -1,6 +1,8 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { ImagePlus, LogOut, MapPin, Save, Star, Trash2 } from 'lucide-react'
+import { MAX_PROPERTY_IMAGES } from '@/lib/property-images'
 
 type Campo = {
   key: string
@@ -11,9 +13,14 @@ type Campo = {
   options?: readonly string[]
 }
 
+type UploadedImage = {
+  path: string
+  url: string
+}
+
 const CAMPOS: Campo[] = [
   { key: 'titulo', label: 'Titulo', type: 'text', required: true, span: 2 },
-  { key: 'tipo', label: 'Tipo', type: 'select', options: ['apartamento', 'casa', 'terreno', 'comercial'], required: true },
+  { key: 'tipo', label: 'Tipo', type: 'select', options: ['apartamento', 'casa', 'terreno', 'comercial', 'hotel'], required: true },
   { key: 'negocio', label: 'Negocio', type: 'select', options: ['venda', 'aluguel', 'temporada'], required: true },
   { key: 'preco', label: 'Preco (R$)', type: 'number', required: true },
   { key: 'area_m2', label: 'Area (m2)', type: 'number', required: true },
@@ -22,11 +29,15 @@ const CAMPOS: Campo[] = [
   { key: 'vagas', label: 'Vagas', type: 'number' },
   { key: 'condominio', label: 'Condominio (R$/mes)', type: 'number' },
   { key: 'iptu', label: 'IPTU (R$/ano)', type: 'number' },
+  { key: 'cep', label: 'CEP', type: 'text', required: true },
+  { key: 'numero', label: 'Numero', type: 'text', required: true },
+  { key: 'endereco', label: 'Endereco', type: 'text', required: true, span: 2 },
+  { key: 'complemento', label: 'Complemento', type: 'text' },
   { key: 'bairro', label: 'Bairro', type: 'text', required: true },
   { key: 'cidade', label: 'Cidade', type: 'text', required: true },
-  { key: 'estado', label: 'Estado', type: 'text' },
-  { key: 'cep', label: 'CEP', type: 'text' },
-  { key: 'endereco', label: 'Endereco', type: 'text', span: 2 },
+  { key: 'estado', label: 'Estado', type: 'text', required: true },
+  { key: 'latitude', label: 'Latitude', type: 'number' },
+  { key: 'longitude', label: 'Longitude', type: 'number' },
   { key: 'portal_origem', label: 'Portal de origem', type: 'text' },
   { key: 'url_original', label: 'URL original', type: 'text' },
   { key: 'descricao', label: 'Descricao', type: 'textarea', span: 2 },
@@ -41,6 +52,18 @@ export default function AdminPage() {
   const [verificandoSessao, setVerificandoSessao] = useState(true)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [msg, setMsg] = useState('')
+  const [consultandoCep, setConsultandoCep] = useState(false)
+  const [arquivos, setArquivos] = useState<File[]>([])
+  const [principalIndex, setPrincipalIndex] = useState(0)
+
+  const previews = useMemo(
+    () => arquivos.map(arquivo => ({ arquivo, url: URL.createObjectURL(arquivo) })),
+    [arquivos],
+  )
+
+  useEffect(() => () => {
+    previews.forEach(preview => URL.revokeObjectURL(preview.url))
+  }, [previews])
 
   useEffect(() => {
     fetch('/api/admin/session')
@@ -88,8 +111,74 @@ export default function AdminPage() {
 
   function limpar() {
     setForm(FORM_INICIAL)
+    setArquivos([])
+    setPrincipalIndex(0)
     setStatus('idle')
     setMsg('')
+  }
+
+  function selecionarFotos(files: FileList | null) {
+    const selecionados = Array.from(files ?? []).slice(0, MAX_PROPERTY_IMAGES)
+    setArquivos(selecionados)
+    setPrincipalIndex(0)
+    setStatus('idle')
+    setMsg('')
+  }
+
+  function removerFoto(index: number) {
+    setArquivos(current => current.filter((_, fileIndex) => fileIndex !== index))
+    setPrincipalIndex(current => current === index ? 0 : current > index ? current - 1 : current)
+  }
+
+  async function consultarCep() {
+    if (!form.cep?.trim()) {
+      setStatus('error')
+      setMsg('Informe um CEP valido.')
+      return
+    }
+
+    setConsultandoCep(true)
+    setStatus('idle')
+    setMsg('')
+
+    try {
+      const res = await fetch('/api/admin/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cep: form.cep, numero: form.numero || undefined }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error ?? 'Nao foi possivel consultar o CEP.')
+
+      const endereco = data.endereco as Record<string, unknown>
+      setForm(current => ({
+        ...current,
+        cep: String(endereco.cep ?? current.cep ?? ''),
+        endereco: String(endereco.endereco ?? current.endereco ?? ''),
+        complemento: String(endereco.complemento ?? current.complemento ?? ''),
+        bairro: String(endereco.bairro ?? current.bairro ?? ''),
+        cidade: String(endereco.cidade ?? current.cidade ?? ''),
+        estado: String(endereco.estado ?? current.estado ?? ''),
+        latitude: endereco.latitude == null ? current.latitude ?? '' : String(endereco.latitude),
+        longitude: endereco.longitude == null ? current.longitude ?? '' : String(endereco.longitude),
+      }))
+      setMsg(endereco.latitude == null ? 'Endereco encontrado. Coordenadas nao localizadas.' : 'Endereco e coordenadas encontrados.')
+      setStatus('success')
+    } catch (error) {
+      setStatus('error')
+      setMsg(error instanceof Error ? error.message : 'Nao foi possivel consultar o CEP.')
+    } finally {
+      setConsultandoCep(false)
+    }
+  }
+
+  async function limparUploads(imagens: UploadedImage[]) {
+    if (imagens.length === 0) return
+    await fetch('/api/admin/property-images', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paths: imagens.map(imagem => imagem.path) }),
+    }).catch(() => null)
   }
 
   async function salvar() {
@@ -100,13 +189,39 @@ export default function AdminPage() {
       return
     }
 
+    if (arquivos.length < 1) {
+      setStatus('error')
+      setMsg('Adicione ao menos uma foto do imovel.')
+      return
+    }
+
     setStatus('loading')
+    let imagensEnviadas: UploadedImage[] = []
+
     try {
+      const orderedFiles = [
+        arquivos[principalIndex],
+        ...arquivos.filter((_, index) => index !== principalIndex),
+      ]
+      const imageData = new FormData()
+      orderedFiles.forEach(file => imageData.append('files', file))
+
+      const uploadRes = await fetch('/api/admin/property-images', {
+        method: 'POST',
+        body: imageData,
+      })
+      const uploadData = await uploadRes.json().catch(() => null)
+      if (!uploadRes.ok) throw new Error(uploadData?.error ?? 'Erro ao enviar fotos.')
+
+      imagensEnviadas = uploadData.imagens
       const payload: Record<string, unknown> = {}
       CAMPOS.forEach((campo) => {
         const valor = form[campo.key]?.trim()
         if (valor) payload[campo.key] = campo.type === 'number' ? Number(valor) : valor
       })
+      payload.localizacao_aproximada = true
+      payload.fotos = uploadData.fotos
+      payload.foto_principal = uploadData.fotos[0]
 
       const res = await fetch('/api/imoveis', {
         method: 'POST',
@@ -120,9 +235,12 @@ export default function AdminPage() {
       }
 
       setStatus('success')
-      setMsg('Imovel cadastrado com sucesso.')
+      setMsg('Imovel cadastrado com fotos e localizacao.')
       setForm(FORM_INICIAL)
+      setArquivos([])
+      setPrincipalIndex(0)
     } catch (error) {
+      await limparUploads(imagensEnviadas)
       setStatus('error')
       setMsg(error instanceof Error ? error.message : 'Erro ao salvar. Verifique o Supabase.')
     }
@@ -168,9 +286,7 @@ export default function AdminPage() {
             />
           </div>
 
-          {status === 'error' && (
-            <div style={{ color: 'var(--danger)', fontSize: '0.875rem' }}>{msg}</div>
-          )}
+          {status === 'error' && <div style={{ color: 'var(--danger)', fontSize: '0.875rem' }}>{msg}</div>}
 
           <button className="btn btn-primary" type="submit" style={{ justifyContent: 'center' }}>
             {status === 'loading' ? 'Entrando...' : 'Entrar'}
@@ -181,18 +297,18 @@ export default function AdminPage() {
   }
 
   return (
-    <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+    <div style={{ maxWidth: '980px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.75rem', marginBottom: '0.5rem' }}>
-            Painel Admin
+            Novo imovel real
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Cadastre imoveis manualmente para popular o banco de dados.
+            Complete dados, fotos e localizacao antes de publicar.
           </p>
         </div>
         <button className="btn btn-ghost" onClick={bloquear}>
-          Sair
+          <LogOut size={16} aria-hidden="true" /> Sair
         </button>
       </div>
 
@@ -218,7 +334,7 @@ export default function AdminPage() {
             ) : campo.type === 'textarea' ? (
               <textarea
                 id={`admin-${campo.key}`}
-                rows={3}
+                rows={4}
                 value={form[campo.key] ?? ''}
                 onChange={(e) => setForm({ ...form, [campo.key]: e.target.value })}
                 style={{ resize: 'vertical' }}
@@ -227,12 +343,57 @@ export default function AdminPage() {
               <input
                 id={`admin-${campo.key}`}
                 type={campo.type}
+                step={campo.key === 'latitude' || campo.key === 'longitude' ? 'any' : undefined}
                 value={form[campo.key] ?? ''}
                 onChange={(e) => setForm({ ...form, [campo.key]: e.target.value })}
               />
             )}
+            {campo.key === 'cep' && (
+              <button className="btn btn-ghost" type="button" onClick={consultarCep} disabled={consultandoCep} style={{ marginTop: '0.5rem' }}>
+                <MapPin size={16} aria-hidden="true" /> {consultandoCep ? 'Consultando...' : 'Consultar CEP'}
+              </button>
+            )}
           </div>
         ))}
+
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label htmlFor="admin-fotos" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+            Fotos * <span style={{ fontWeight: 400 }}>JPG, PNG ou WebP, maximo 5 MB cada</span>
+          </label>
+          <label htmlFor="admin-fotos" className="btn btn-ghost" style={{ width: 'fit-content' }}>
+            <ImagePlus size={16} aria-hidden="true" /> Selecionar fotos
+          </label>
+          <input
+            id="admin-fotos"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={(event) => selecionarFotos(event.target.files)}
+            style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', opacity: 0 }}
+          />
+        </div>
+
+        {previews.length > 0 && (
+          <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
+            {previews.map((preview, index) => (
+              <div key={`${preview.arquivo.name}-${index}`} style={{ border: index === principalIndex ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+                <div
+                  role="img"
+                  aria-label={`Preview ${index + 1}: ${preview.arquivo.name}`}
+                  style={{ aspectRatio: '4 / 3', backgroundImage: `url("${preview.url}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.4rem', padding: '0.5rem' }}>
+                  <button className="btn btn-ghost" type="button" onClick={() => setPrincipalIndex(index)} aria-label={`Definir foto ${index + 1} como principal`} style={{ padding: '0.4rem' }}>
+                    <Star size={15} fill={index === principalIndex ? 'currentColor' : 'none'} aria-hidden="true" />
+                  </button>
+                  <button className="btn btn-ghost" type="button" onClick={() => removerFoto(index)} aria-label={`Remover foto ${index + 1}`} style={{ padding: '0.4rem' }}>
+                    <Trash2 size={15} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {status !== 'idle' && (
           <div style={{
@@ -243,7 +404,7 @@ export default function AdminPage() {
             color: status === 'success' ? 'var(--success)' : status === 'error' ? 'var(--danger)' : 'var(--text-muted)',
             fontSize: '0.875rem',
           }}>
-            {status === 'loading' ? 'Salvando...' : msg}
+            {status === 'loading' ? 'Enviando fotos e salvando...' : msg}
           </div>
         )}
 
@@ -252,7 +413,7 @@ export default function AdminPage() {
             Limpar
           </button>
           <button className="btn btn-primary" onClick={salvar} disabled={status === 'loading'}>
-            {status === 'loading' ? 'Salvando...' : 'Salvar imovel'}
+            <Save size={16} aria-hidden="true" /> {status === 'loading' ? 'Salvando...' : 'Salvar imovel'}
           </button>
         </div>
       </div>

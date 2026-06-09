@@ -1,5 +1,10 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { e2eImovel, e2eImoveisSimilares } from './e2e-fixtures'
+import {
+  createPropertyImagePath,
+  PROPERTY_IMAGES_BUCKET,
+  type PropertyImageFile,
+} from './property-images'
 import type { Imovel, ImovelSimilar } from './types'
 
 let publicClient: SupabaseClient | null = null
@@ -162,6 +167,41 @@ export async function deleteImovel(id: string) {
     .from('imoveis')
     .update({ status: 'inativo' })
     .eq('id', id)
+  if (error) throw error
+}
+
+export async function uploadPropertyImages(files: PropertyImageFile[]) {
+  const storage = getAdminClient().storage.from(PROPERTY_IMAGES_BUCKET)
+  const uploaded: { path: string; url: string }[] = []
+
+  try {
+    for (const file of files) {
+      const path = createPropertyImagePath(file)
+      const { error } = await storage.upload(path, Buffer.from(await file.arrayBuffer()), {
+        cacheControl: '31536000',
+        contentType: file.type,
+        upsert: false,
+      })
+      if (error) throw error
+
+      const { data } = storage.getPublicUrl(path)
+      uploaded.push({ path, url: data.publicUrl })
+    }
+  } catch (error) {
+    if (uploaded.length > 0) {
+      await storage.remove(uploaded.map(image => image.path)).catch(() => null)
+    }
+    throw error
+  }
+
+  return uploaded
+}
+
+export async function removePropertyImages(paths: string[]) {
+  if (paths.length === 0) return
+  const { error } = await getAdminClient().storage
+    .from(PROPERTY_IMAGES_BUCKET)
+    .remove(paths)
   if (error) throw error
 }
 

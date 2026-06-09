@@ -32,6 +32,10 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
   }
 
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
+  const foto = imovel.foto_principal || imovel.fotos?.[0]
+  const localizacao = imovel.localizacao_aproximada
+    ? `${imovel.bairro}, ${imovel.cidade} - ${imovel.estado}`
+    : `${imovel.endereco ?? imovel.bairro}${imovel.numero ? `, ${imovel.numero}` : ''}, ${imovel.cidade} - ${imovel.estado}`
 
   return (
     <div className="property-page">
@@ -41,8 +45,13 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
 
       <div className="property-detail-layout">
         <div>
-          <div className="property-photo-placeholder">
-            {mediaLabel(imovel.tipo)}
+          <div
+            className="property-photo-placeholder"
+            role={foto ? 'img' : undefined}
+            aria-label={foto ? `Foto principal de ${imovel.titulo}` : undefined}
+            style={foto ? { backgroundImage: `url("${foto}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+          >
+            {!foto && mediaLabel(imovel.tipo)}
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -59,7 +68,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
             {imovel.titulo}
           </h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            {imovel.endereco ?? imovel.bairro}, {imovel.cidade} - {imovel.estado}
+            {localizacao}
           </p>
 
           <div className="property-attributes">

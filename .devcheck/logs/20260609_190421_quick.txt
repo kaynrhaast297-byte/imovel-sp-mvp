@@ -1,0 +1,16 @@
+════════════════════════════════════════════════════════════
+  DEVCHECK — QUICK
+  09/06/2026 19:04:21
+  Projeto: D:\ESTUDOS\PROJETOS\imovel-sp-mvp
+════════════════════════════════════════════════════════════
+
+  ✅ PASS     Git Check
+           Branch: feature/property-data | Sem problemas detectados
+  ✅ PASS     Quality Gates
+           Lint e build OK
+  ✅ PASS     Unit Tests  (41.9s)
+           Passou em 41.9s
+
+────────────────────────────────────────────────────────────
+  Resultado geral: ✅ PASS
+────────────────────────────────────────────────────────────

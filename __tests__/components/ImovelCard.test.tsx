@@ -62,4 +62,12 @@ describe('ImovelCard', () => {
 
     expect(screen.queryByText('por m2')).not.toBeInTheDocument()
   })
+
+  it('usa a foto principal quando ela existe', () => {
+    render(<ImovelCard imovel={{ ...imovel, foto_principal: 'https://example.com/principal.jpg' }} />)
+
+    expect(screen.getByRole('img', { name: /foto principal/i })).toHaveStyle({
+      backgroundImage: 'url("https://example.com/principal.jpg")',
+    })
+  })
 })

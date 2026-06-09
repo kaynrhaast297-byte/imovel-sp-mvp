@@ -1,0 +1,25 @@
+════════════════════════════════════════════════════════════
+  DEVCHECK — APPROVE
+  09/06/2026 19:06:53
+  Projeto: D:\ESTUDOS\PROJETOS\imovel-sp-mvp
+════════════════════════════════════════════════════════════
+
+  ✅ PASS     Git Check
+           Branch: feature/property-data | Sem problemas detectados
+  ✅ PASS     Quality Gates
+           Lint e build OK
+  ✅ PASS     Unit Tests  (14.0s)
+           Passou em 14.0s
+  ✅ PASS     Integration Tests  (23.8s)
+           Passou em 23.8s
+  ✅ PASS     E2E Tests  (45.6s)
+           Passou em 45.6s
+  ⏭️ SKIPPED  Coverage
+           Coverage nao configurado para nextjs
+  ✅ PASS     Security Scan
+           Nenhum segredo exposto detectado
+
+────────────────────────────────────────────────────────────
+  Resultado geral: ✅ PASS
+  ✅ APROVADO — seguro para commit
+────────────────────────────────────────────────────────────

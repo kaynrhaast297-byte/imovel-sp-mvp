@@ -21,9 +21,13 @@ export interface Imovel {
   estado: string
   cep?: string
   endereco?: string
+  numero?: string
+  complemento?: string
   latitude?: number
   longitude?: number
+  localizacao_aproximada?: boolean
   fotos?: string[]
+  foto_principal?: string
   portal_origem?: string
   url_original?: string
   created_at: string

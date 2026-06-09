@@ -51,3 +51,38 @@ O que devo estudar agora?
 - Como revisar PRs pequenos.
 - Como ler falhas de teste sem apagar cobertura.
 - Como separar seguranca, dados e UX em branches independentes.
+
+## 2026-06-08 - Property Data
+
+Branch: `feature/property-data`
+
+O que foi feito?
+
+- Criada migration aditiva para endereco completo e bucket `property-images`.
+- Adicionado upload server-side com preview, foto principal, rollback e validacao da assinatura binaria.
+- Integrados ViaCEP e Nominatim com timeout, fila de 1 requisicao por segundo e cache.
+- Atualizado o admin e a exibicao publica da foto/localizacao.
+
+Por que foi feito?
+
+- Para transformar o MVP tecnico em um fluxo capaz de cadastrar um imovel real completo.
+- Para manter segredos, upload e geocodificacao fora do frontend publico.
+
+Quais riscos existem?
+
+- A migration ainda precisa de aprovacao humana antes de ser aplicada no Supabase ativo.
+- O Nominatim publico exige uso moderado, identificacao e possibilidade futura de troca de provedor.
+- O primeiro imovel real exige fotos e dados autorizados para publicacao.
+
+Quais testes cobrem isso?
+
+- `npm run test:coverage` passou com 103 testes e thresholds verdes.
+- `npm run check:full` passou com type-check, lint, build e 37 cenarios Playwright.
+- ViaCEP e Nominatim foram validados manualmente pelo painel local.
+- Desktop e mobile foram inspecionados no navegador.
+
+O que devo estudar agora?
+
+- Policies e advisors do Supabase Storage.
+- Estrategias de geocodificacao com cache distribuido.
+- Tratamento e otimizacao de imagens antes do upload.

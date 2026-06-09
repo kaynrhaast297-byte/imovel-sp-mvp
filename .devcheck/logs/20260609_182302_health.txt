@@ -1,0 +1,18 @@
+════════════════════════════════════════════════════════════
+  DEVCHECK — HEALTH
+  09/06/2026 18:23:02
+  Projeto: D:\ESTUDOS\PROJETOS\imovel-sp-mvp
+════════════════════════════════════════════════════════════
+
+  ✅ PASS     Ferramentas
+           Todas disponíveis: git, node, npm
+  ⏭️ SKIPPED  Docker
+           Docker não instalado (opcional)
+  ⚠️ WARN     devcheck.json
+           devcheck.json não encontrado — usando defaults
+  ⚠️ WARN     .gitignore
+           Entradas faltando: __pycache__
+
+────────────────────────────────────────────────────────────
+  Resultado geral: ⚠️ WARN
+────────────────────────────────────────────────────────────

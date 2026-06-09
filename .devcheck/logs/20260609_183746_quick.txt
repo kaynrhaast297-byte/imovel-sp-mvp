@@ -1,0 +1,16 @@
+════════════════════════════════════════════════════════════
+  DEVCHECK — QUICK
+  09/06/2026 18:37:46
+  Projeto: D:\ESTUDOS\PROJETOS\imovel-sp-mvp
+════════════════════════════════════════════════════════════
+
+  ✅ PASS     Git Check
+           Branch: feature/property-data | Sem problemas detectados
+  ⏭️ SKIPPED  Quality Gates
+           script lint não encontrado no package.json
+  ⏭️ SKIPPED  Unit Tests
+           Runner não encontrado: npm
+
+────────────────────────────────────────────────────────────
+  Resultado geral: ✅ PASS
+────────────────────────────────────────────────────────────

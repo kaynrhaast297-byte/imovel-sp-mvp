@@ -47,12 +47,21 @@ function makeQuery(result: QueryResult = { data: [], error: null, count: 0 }) {
 }
 
 function makeClient(queries: ReturnType<typeof makeQuery>[]) {
+  const storageBucket = {
+    getPublicUrl: vi.fn((path: string) => ({ data: { publicUrl: `https://example.com/${path}` } })),
+    remove: vi.fn().mockResolvedValue({ error: null }),
+    upload: vi.fn().mockResolvedValue({ error: null }),
+  }
   return {
     from: vi.fn(() => {
       const query = queries.shift()
       if (!query) throw new Error('Query mock nao configurada.')
       return query
     }),
+    storage: {
+      from: vi.fn(() => storageBucket),
+    },
+    storageBucket,
   }
 }
 
@@ -212,6 +221,44 @@ describe('lib/supabase', () => {
     await expect(createImovel({ titulo: 'Falha' })).rejects.toBe(createError)
     await expect(updateImovel('id', { preco: 1 })).rejects.toBe(updateError)
     await expect(deleteImovel('id')).rejects.toBe(deleteError)
+  })
+
+  it('envia e remove imagens usando storage admin com rollback em falha parcial', async () => {
+    const { uploadPropertyImages, removePropertyImages, adminClient } = await loadSupabase()
+    const file = {
+      name: 'foto.jpg',
+      type: 'image/jpeg',
+      size: 4,
+      arrayBuffer: async () => new ArrayBuffer(4),
+    }
+
+    const uploaded = await uploadPropertyImages([file])
+    expect(uploaded).toHaveLength(1)
+    expect(uploaded[0].url).toContain('/properties/')
+    expect(adminClient.storage.from).toHaveBeenCalledWith('property-images')
+    expect(adminClient.storageBucket.upload).toHaveBeenCalledWith(
+      expect.stringMatching(/^properties\/.+\.jpg$/),
+      expect.any(Buffer),
+      { cacheControl: '31536000', contentType: 'image/jpeg', upsert: false },
+    )
+
+    await removePropertyImages([])
+    expect(adminClient.storageBucket.remove).not.toHaveBeenCalled()
+
+    await removePropertyImages([uploaded[0].path])
+    expect(adminClient.storageBucket.remove).toHaveBeenCalledWith([uploaded[0].path])
+
+    const uploadError = new Error('upload falhou')
+    adminClient.storageBucket.upload
+      .mockResolvedValueOnce({ error: null })
+      .mockResolvedValueOnce({ error: uploadError })
+    adminClient.storageBucket.remove.mockRejectedValueOnce(new Error('rollback offline'))
+    await expect(uploadPropertyImages([file, file])).rejects.toBe(uploadError)
+    expect(adminClient.storageBucket.remove).toHaveBeenCalledWith([expect.stringMatching(/^properties\//)])
+
+    const removeError = new Error('remove falhou')
+    adminClient.storageBucket.remove.mockResolvedValueOnce({ error: removeError })
+    await expect(removePropertyImages(['properties/teste.jpg'])).rejects.toBe(removeError)
   })
 
   it('combina similares reais sem duplicatas e limita o resultado', async () => {

@@ -27,6 +27,11 @@ const validImovel = {
   bairro: 'Pinheiros',
   cidade: 'Sao Paulo',
   estado: 'sp',
+  cep: '05422-000',
+  endereco: 'Rua dos Pinheiros',
+  numero: '100',
+  fotos: ['https://example.com/foto.jpg'],
+  foto_principal: 'https://example.com/foto.jpg',
 }
 
 function makeJsonRequest(body: unknown) {
@@ -120,6 +125,12 @@ describe('POST /api/imoveis', () => {
       bairro: 'Pinheiros',
       cidade: 'Sao Paulo',
       estado: 'SP',
+      cep: '05422-000',
+      endereco: 'Rua dos Pinheiros',
+      numero: '100',
+      localizacao_aproximada: true,
+      fotos: ['https://example.com/foto.jpg'],
+      foto_principal: 'https://example.com/foto.jpg',
       status: 'ativo',
       created_at: expect.any(String),
       updated_at: expect.any(String),

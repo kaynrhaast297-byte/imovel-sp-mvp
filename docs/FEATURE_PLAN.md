@@ -46,16 +46,16 @@ endereco, cep, fotos, latitude, longitude
 | # | Etapa | Branch | Status |
 |---|---|---|---|
 | 0 | Merge seguranca | `feature/security-tests -> master` | Concluido - CI verde |
-| 1 | Finalizar AI Quality Lab | `feature/ai-quality-lab -> master` | Em andamento |
-| 2 | Supabase Storage com bucket `property-images` | `feature/property-data` | Proxima |
-| 3 | Schema real dos imoveis | `feature/property-data` | Pendente |
-| 4 | Admin completo com fotos, CEP, endereco e numero | `feature/property-data` | Pendente |
-| 5 | Upload multiplo com preview e foto principal | `feature/property-data` | Pendente |
-| 6 | Geocodificacao com ViaCEP + Nominatim | `feature/property-data` | Pendente |
-| 7 | Validacao Zod de CEP, preco, fotos, endereco e tipo | `feature/property-data` | Pendente |
-| 8 | Cadastrar 1 imovel real completo | Manual | Pendente |
+| 1 | Finalizar AI Quality Lab | `feature/ai-quality-lab -> master` | Concluido |
+| 2 | Supabase Storage com bucket `property-images` | `feature/property-data` | Implementado localmente - aplicar migration |
+| 3 | Schema real dos imoveis | `feature/property-data` | Implementado localmente - aplicar migration |
+| 4 | Admin completo com fotos, CEP, endereco e numero | `feature/property-data` | Implementado |
+| 5 | Upload multiplo com preview e foto principal | `feature/property-data` | Implementado |
+| 6 | Geocodificacao com ViaCEP + Nominatim | `feature/property-data` | Implementado |
+| 7 | Validacao Zod de CEP, preco, fotos, endereco e tipo | `feature/property-data` | Implementado |
+| 8 | Cadastrar 1 imovel real completo | Manual | Aguarda migration e dados reais |
 | 9 | Fallback profissional para imoveis sem foto | `feature/property-data` | Pendente |
-| 10 | Testes + Ollama + PR | `feature/property-data` | Pendente |
+| 10 | Testes + Ollama + PR | `feature/property-data` | Testes e Ollama concluidos - PR pendente |
 | 11 | Pagina de detalhe com galeria, mapa e CTA | `feature/property-experience` | Apos dados reais |
 | 12 | Swiper, Leaflet e favoritos | `feature/property-experience` | Pendente |
 | 13 | Busca avancada | `feature/property-experience` | Pendente |

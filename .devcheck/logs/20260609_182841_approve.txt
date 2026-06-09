@@ -1,0 +1,30 @@
+════════════════════════════════════════════════════════════
+  DEVCHECK — APPROVE
+  09/06/2026 18:28:41
+  Projeto: D:\ESTUDOS\PROJETOS\imovel-sp-mvp
+════════════════════════════════════════════════════════════
+
+  ✅ PASS     Git Check
+           Branch: feature/property-data | Sem problemas detectados
+  ⏭️ SKIPPED  Quality Gates
+           npm lint não disponível
+  ⏭️ SKIPPED  Unit Tests
+           Runner não encontrado: npm
+  ⏭️ SKIPPED  Integration Tests
+           Runner não encontrado
+  ✅ PASS     E2E Tests  (57.3s)
+           Passou em 57.3s
+  ⏭️ SKIPPED  Coverage
+           Coverage não configurado para nextjs
+  ❌ FAIL     Security Scan
+           8 segredo(s) detectado(s)
+           > Segredo/senha exposta: .next\dev\server\vendor-chunks\next.js
+           > Segredo/senha exposta: .next\dev\static\chunks\polyfills.js
+           > Segredo/senha exposta: .next\server\chunks\[root-of-the-server]__0xuaoik._.js
+           > Segredo/senha exposta: .next\server\chunks\_0gbdhwk._.js
+           > Segredo/senha exposta: .next\server\chunks\_1pysro4._.js
+
+────────────────────────────────────────────────────────────
+  Resultado geral: ✅ PASS
+  ✅ APROVADO — seguro para commit
+────────────────────────────────────────────────────────────
