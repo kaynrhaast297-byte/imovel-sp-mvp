@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
+import { ArrowRight, MessageCircle } from 'lucide-react'
 import { z } from 'zod'
 
 const leadSchema = z.object({
@@ -76,23 +77,17 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
       aria-busy={status === 'loading'}
       aria-label="Formulario de contato"
       className="lead-form"
-      style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.85rem',
-        padding: '1.25rem',
-      }}
     >
-      <div>
-        <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>
+      <div className="lead-form-head">
+        <MessageCircle size={20} />
+        <div>
+        <h3>
           Quero saber mais
         </h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+        <p>
           Envie seus dados para receber atendimento sobre este imovel.
         </p>
+        </div>
       </div>
 
       <LeadField label="Nome" error={errors.nome?.message}>
@@ -108,21 +103,14 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
       </LeadField>
 
       <LeadField label="Mensagem" error={errors.mensagem?.message}>
-        <textarea {...register('mensagem')} rows={4} style={{ resize: 'vertical' }} />
+        <textarea {...register('mensagem')} rows={4} />
       </LeadField>
 
       {feedback && (
         <div
           role={status === 'error' ? 'alert' : 'status'}
           aria-live="polite"
-          className="lead-feedback"
-          style={{
-            background: status === 'success' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-            borderRadius: 'var(--radius-sm)',
-            color: status === 'success' ? 'var(--success)' : 'var(--danger)',
-            fontSize: '0.85rem',
-            padding: '0.75rem',
-          }}
+          className={`lead-feedback ${status === 'success' ? 'lead-feedback-success' : 'lead-feedback-error'}`}
         >
           {feedback}
         </div>
@@ -132,10 +120,10 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
         className="btn btn-primary"
         type="submit"
         disabled={status === 'loading'}
-        style={{ justifyContent: 'center', opacity: status === 'loading' ? 0.75 : 1 }}
       >
         {status === 'loading' && <span className="button-spinner" aria-hidden="true" />}
         {status === 'loading' ? 'Enviando...' : 'Enviar contato'}
+        {status !== 'loading' && <ArrowRight size={15} />}
       </button>
     </form>
   )

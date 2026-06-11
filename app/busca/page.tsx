@@ -1,7 +1,8 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { ArrowLeft, ArrowRight, ListFilter, Map, Search, SlidersHorizontal } from 'lucide-react'
 import ImovelCard from '@/components/ImovelCard'
 import { Imovel, Pagination } from '@/lib/types'
 
@@ -18,7 +19,6 @@ const emptyPagination: Pagination = {
 
 function BuscaConteudo() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const queryString = searchParams.toString()
   const [imoveis, setImoveis] = useState<Imovel[]>([])
   const [pagination, setPagination] = useState<Pagination>(emptyPagination)
@@ -33,6 +33,10 @@ function BuscaConteudo() {
     quartos: searchParams.get('quartos') ?? '',
     preco_max: searchParams.get('preco_max') ?? '',
   })
+
+  function navigateSearch(params: URLSearchParams) {
+    window.history.pushState(null, '', `/busca?${params.toString()}`)
+  }
 
   useEffect(() => {
     let ativo = true
@@ -84,7 +88,7 @@ function BuscaConteudo() {
     if (ordenacao !== 'recentes') params.set('ordenacao', ordenacao)
     params.set('page', '1')
     params.set('per_page', String(PER_PAGE))
-    router.push(`/busca?${params.toString()}`)
+    navigateSearch(params)
   }
 
   function alterarOrdenacao(valor: string) {
@@ -96,14 +100,14 @@ function BuscaConteudo() {
     }
     params.set('page', '1')
     params.set('per_page', String(PER_PAGE))
-    router.push(`/busca?${params.toString()}`)
+    navigateSearch(params)
   }
 
   function mudarPagina(page: number) {
     const params = new URLSearchParams(searchParams.toString())
     params.set('page', String(page))
     params.set('per_page', String(PER_PAGE))
-    router.push(`/busca?${params.toString()}`)
+    navigateSearch(params)
   }
 
   function limparFiltros() {
@@ -114,7 +118,10 @@ function BuscaConteudo() {
       quartos: '',
       preco_max: '',
     })
-    router.push(`/busca?page=1&per_page=${PER_PAGE}`)
+    const params = new URLSearchParams()
+    params.set('page', '1')
+    params.set('per_page', String(PER_PAGE))
+    navigateSearch(params)
   }
 
   const totalLabel = pagination.total === 1
@@ -122,16 +129,34 @@ function BuscaConteudo() {
     : `${pagination.total} imoveis encontrados`
 
   return (
-    <div className="search-layout">
-      <aside className="search-sidebar">
-        <h2 style={{ fontWeight: 700, marginBottom: '1.25rem', fontSize: '1rem' }}>Filtros</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Bairro</label>
-            <input placeholder="Ex: Moema" value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} />
+    <div className="search-page">
+      <section className="search-page-head">
+        <div>
+          <p className="eyebrow">Curadoria ImovelSP</p>
+          <h1>{loading ? 'Buscando imoveis...' : totalLabel}</h1>
+          <p>Compare enderecos, atributos e preco por metro quadrado.</p>
+        </div>
+        <button className="btn btn-ghost search-map-button" type="button">
+          <Map size={16} /> Ver no mapa
+        </button>
+      </section>
+
+      <div className="search-layout">
+        <aside className="search-sidebar">
+          <div className="filter-title">
+            <div>
+              <ListFilter size={17} />
+              <h2>Filtros</h2>
+            </div>
+            <button type="button" onClick={limparFiltros}>Limpar</button>
           </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Tipo</label>
+          <div className="filter-fields">
+            <label className="filter-field">
+              <span>Bairro</span>
+            <input placeholder="Ex: Moema" value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} />
+            </label>
+            <label className="filter-field">
+              <span>Tipo</span>
             <select aria-label="Tipo" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
               <option value="">Todos</option>
               <option value="apartamento">Apartamento</option>
@@ -139,17 +164,17 @@ function BuscaConteudo() {
               <option value="terreno">Terreno</option>
               <option value="comercial">Comercial</option>
             </select>
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Negocio</label>
+            </label>
+            <label className="filter-field">
+              <span>Negocio</span>
             <select aria-label="Negocio" value={form.negocio} onChange={(e) => setForm({ ...form, negocio: e.target.value })}>
               <option value="venda">Venda</option>
               <option value="aluguel">Aluguel</option>
               <option value="temporada">Temporada</option>
             </select>
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Quartos minimos</label>
+            </label>
+            <label className="filter-field">
+              <span>Quartos minimos</span>
             <select aria-label="Quartos minimos" value={form.quartos} onChange={(e) => setForm({ ...form, quartos: e.target.value })}>
               <option value="">Qualquer</option>
               <option value="1">1+</option>
@@ -157,32 +182,28 @@ function BuscaConteudo() {
               <option value="3">3+</option>
               <option value="4">4+</option>
             </select>
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>Preco maximo</label>
+            </label>
+            <label className="filter-field">
+              <span>Preco maximo</span>
             <input type="number" placeholder="R$ 0" value={form.preco_max} onChange={(e) => setForm({ ...form, preco_max: e.target.value })} />
+            </label>
+            <button type="button" className="btn btn-primary filter-submit" onClick={aplicarFiltros}>
+              <Search size={16} /> Aplicar filtros
+            </button>
           </div>
-          <button className="btn btn-primary" onClick={aplicarFiltros} style={{ width: '100%', justifyContent: 'center' }}>
-            Aplicar filtros
-          </button>
-        </div>
-      </aside>
+        </aside>
 
-      <div>
+        <div className="search-results">
         <div className="search-header">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.5rem' }}>
-              {loading ? 'Buscando...' : totalLabel}
-            </h1>
             {!loading && pagination.total > 0 && (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                Pagina {pagination.page} de {pagination.total_pages}
-              </p>
+              <p>Pagina {pagination.page} de {pagination.total_pages}</p>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {form.bairro && <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>em <strong style={{ color: 'var(--text)' }}>{form.bairro}</strong></span>}
-            <select aria-label="Ordenacao" value={ordenacao} onChange={(event) => alterarOrdenacao(event.target.value)} style={{ width: 'auto', minWidth: '190px' }}>
+          <div className="search-order">
+            {form.bairro && <span>em <strong>{form.bairro}</strong></span>}
+            <SlidersHorizontal size={15} />
+            <select aria-label="Ordenacao" value={ordenacao} onChange={(event) => alterarOrdenacao(event.target.value)}>
               <option value="recentes">Mais recentes</option>
               <option value="preco_m2_asc">Menor preco/m2</option>
               <option value="preco_asc">Menor preco total</option>
@@ -214,10 +235,10 @@ function BuscaConteudo() {
             <p>{erro}</p>
             <p>Tente novamente em alguns instantes.</p>
             <div className="search-state-actions">
-              <button className="btn btn-primary" onClick={() => setRetryToken((token) => token + 1)}>
+              <button type="button" className="btn btn-primary" onClick={() => setRetryToken((token) => token + 1)}>
                 Tentar novamente
               </button>
-              <button className="btn btn-ghost" onClick={limparFiltros}>
+              <button type="button" className="btn btn-ghost" onClick={limparFiltros}>
                 Limpar filtros
               </button>
             </div>
@@ -228,7 +249,7 @@ function BuscaConteudo() {
             <h2>Nenhum imovel encontrado</h2>
             <p>Tente ajustar os filtros ou buscar em outro bairro.</p>
             <div className="search-state-actions">
-              <button className="btn btn-primary" onClick={limparFiltros}>
+              <button type="button" className="btn btn-primary" onClick={limparFiltros}>
                 Limpar filtros
               </button>
             </div>
@@ -242,26 +263,29 @@ function BuscaConteudo() {
             {pagination.total_pages > 1 && (
               <nav className="pagination" aria-label="Paginacao de imoveis">
                 <button
+                  type="button"
                   className="btn btn-ghost"
                   disabled={!pagination.has_prev || loading}
                   onClick={() => mudarPagina(pagination.page - 1)}
                 >
-                  Anterior
+                  <ArrowLeft size={15} /> Anterior
                 </button>
                 <span>
                   Pagina {pagination.page} de {pagination.total_pages}
                 </span>
                 <button
+                  type="button"
                   className="btn btn-ghost"
                   disabled={!pagination.has_next || loading}
                   onClick={() => mudarPagina(pagination.page + 1)}
                 >
-                  Proxima
+                  Proxima <ArrowRight size={15} />
                 </button>
               </nav>
             )}
           </>
         )}
+        </div>
       </div>
     </div>
   )
@@ -269,7 +293,7 @@ function BuscaConteudo() {
 
 export default function BuscaPage() {
   return (
-    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Carregando...</div>}>
+    <Suspense fallback={<div className="page-loading">Carregando...</div>}>
       <BuscaConteudo />
     </Suspense>
   )

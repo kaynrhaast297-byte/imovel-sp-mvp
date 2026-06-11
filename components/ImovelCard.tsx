@@ -1,67 +1,58 @@
 import Link from 'next/link'
+import { Bath, BedDouble, CarFront, Expand, Heart, MapPin } from 'lucide-react'
 import { Imovel } from '@/lib/types'
+import { propertyPhoto } from '@/lib/property-visual'
 import { calcularPrecoM2, formatarArea, formatarPreco, labelNegocio, labelTipo } from '@/lib/utils'
 
 interface Props {
   imovel: Imovel
 }
 
-function mediaLabel(tipo: string) {
-  if (tipo === 'casa') return 'Casa'
-  if (tipo === 'terreno') return 'Terreno'
-  if (tipo === 'comercial') return 'Comercial'
-  return 'Apto'
-}
-
 export default function ImovelCard({ imovel }: Props) {
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
 
   return (
-    <Link className="property-card-link" href={`/imovel/${imovel.id}`} style={{ textDecoration: 'none' }}>
-      <div className="card property-card" style={{ padding: '1.25rem', cursor: 'pointer', height: '100%' }}>
-        <div className="property-card-media">
-          {mediaLabel(imovel.tipo)}
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-          <span className="badge badge-blue">{labelTipo(imovel.tipo)}</span>
-          <span className="badge badge-yellow">{labelNegocio(imovel.negocio)}</span>
-          {imovel.portal_origem && (
-            <span className="badge" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-              {imovel.portal_origem}
-            </span>
-          )}
-        </div>
-
-        <p style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text)' }}>
-          {imovel.titulo}
-        </p>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-          {imovel.bairro}, {imovel.cidade}
-        </p>
-
-        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <span>{formatarArea(imovel.area_m2)}</span>
-          {imovel.quartos != null && <span>{imovel.quartos} qts</span>}
-          {imovel.banheiros != null && <span>{imovel.banheiros} ban</span>}
-          {imovel.vagas != null && <span>{imovel.vagas} vaga{imovel.vagas !== 1 ? 's' : ''}</span>}
-        </div>
-
-        <div className="property-card-footer" style={{ borderTop: '1px solid var(--border)', paddingTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem' }}>
-          <div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text)' }}>
-              {formatarPreco(imovel.preco)}
-            </div>
-            {imovel.negocio === 'aluguel' && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/mes</div>}
+    <Link className="property-card-link" href={`/imovel/${imovel.id}`} aria-label={`Ver ${imovel.titulo}`}>
+      <article className="property-card">
+        <div
+          className="property-card-media"
+          role="img"
+          aria-label={`Foto de ${imovel.titulo}`}
+          style={{ backgroundImage: `url(${propertyPhoto(imovel)})` }}
+        >
+          <div className="property-card-badges">
+            <span>{labelNegocio(imovel.negocio)}</span>
+            {imovel.portal_origem && <span>{imovel.portal_origem}</span>}
           </div>
-          {precoM2 > 0 && (
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>por m2</div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary)' }}>{formatarPreco(precoM2)}</div>
-            </div>
-          )}
+          <span className="property-card-favorite" aria-hidden="true"><Heart size={17} /></span>
         </div>
-      </div>
+
+        <div className="property-card-body">
+          <p className="property-card-kicker">{labelTipo(imovel.tipo)}</p>
+          <h3>{imovel.titulo}</h3>
+          <p className="property-card-location"><MapPin size={14} />{imovel.bairro}, {imovel.cidade}</p>
+
+          <div className="property-card-attributes">
+            <span><Expand size={15} />{formatarArea(imovel.area_m2)}</span>
+            {imovel.quartos != null && <span><BedDouble size={15} />{imovel.quartos} qts</span>}
+            {imovel.banheiros != null && <span><Bath size={15} />{imovel.banheiros} ban</span>}
+            {imovel.vagas != null && <span><CarFront size={15} />{imovel.vagas} vaga{imovel.vagas !== 1 ? 's' : ''}</span>}
+          </div>
+
+          <div className="property-card-footer">
+            <div>
+              <strong>{formatarPreco(imovel.preco)}</strong>
+              {imovel.negocio === 'aluguel' && <small>/mes</small>}
+            </div>
+            {precoM2 > 0 && (
+              <div className="property-card-m2">
+                <small>por m2</small>
+                <strong>{formatarPreco(precoM2)}</strong>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
     </Link>
   )
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ArrowUpRight, AtSign, Building2, Search } from 'lucide-react'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -11,53 +12,38 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth">
       <body>
-        <header style={{
-          background: 'var(--bg-card)',
-          borderBottom: '1px solid var(--border)',
-          padding: '0 1.5rem',
-          height: '64px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-        }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{
-              alignItems: 'center',
-              background: 'var(--primary-action)',
-              borderRadius: 'var(--radius-sm)',
-              color: '#fff',
-              display: 'inline-flex',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              height: '28px',
-              justifyContent: 'center',
-              letterSpacing: '0.08em',
-              width: '34px',
-            }}>
-              SP
-            </span>
-            <span style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.25rem', color: 'var(--text)' }}>
-              Imovel<span style={{ color: 'var(--primary)' }}>SP</span>
-            </span>
+        <header className="site-header">
+          <Link href="/" className="brand" aria-label="ImovelSP - Pagina inicial">
+            Imovel<span>SP</span>
           </Link>
-          <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>Buscar</Link>
-            <Link href="/ai" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>IA Local</Link>
-            <Link href="/admin" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>Admin</Link>
+          <nav className="site-nav" aria-label="Navegacao principal">
+            <Link href="/busca"><Search size={15} />Comprar</Link>
+            <Link href="/busca?negocio=aluguel">Alugar</Link>
+            <Link href="/#destaques">Selecionados</Link>
+            <Link href="/#inteligencia">Inteligencia de preco</Link>
+          </nav>
+          <nav className="site-actions" aria-label="Acoes">
+            <Link href="/ai">IA local</Link>
+            <Link href="/admin" className="site-admin-link">
+              <Building2 size={15} />
+              Admin
+            </Link>
           </nav>
         </header>
-        <main style={{ minHeight: 'calc(100vh - 64px)' }}>{children}</main>
-        <footer style={{
-          borderTop: '1px solid var(--border)',
-          padding: '2rem 1.5rem',
-          textAlign: 'center',
-          color: 'var(--text-muted)',
-          fontSize: '0.85rem',
-        }}>
-          (c) {new Date().getFullYear()} ImovelSP - Comparador de precos de imoveis em Sao Paulo
+        <main className="site-main">{children}</main>
+        <footer className="site-footer">
+          <div>
+            <Link href="/" className="brand brand-footer">Imovel<span>SP</span></Link>
+            <p>Curadoria imobiliaria e inteligencia de preco para Sao Paulo.</p>
+          </div>
+          <div className="footer-links">
+            <Link href="/busca">Explorar imoveis <ArrowUpRight size={14} /></Link>
+            <Link href="/ai">Consultar IA local <ArrowUpRight size={14} /></Link>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+              Instagram <AtSign size={14} />
+            </a>
+          </div>
+          <small>© {new Date().getFullYear()} ImovelSP</small>
         </footer>
       </body>
     </html>

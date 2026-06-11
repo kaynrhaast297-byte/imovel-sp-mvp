@@ -41,4 +41,15 @@ test.describe('Regressao visual', () => {
       maxDiffPixelRatio: 0.03,
     })
   })
+
+  test('busca editorial permanece visualmente estavel', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1024 })
+    await gotoHydrated(page, '/busca?bairro=Pinheiros&negocio=venda&page=1&per_page=12')
+
+    await expect(page.locator('.search-page')).toHaveScreenshot('search-editorial.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixelRatio: 0.03,
+    })
+  })
 })
