@@ -25,6 +25,7 @@
     "gate": "node scripts/run-devcheck.mjs approve",
     "gate:security": "node scripts/run-devcheck.mjs security",
     "hooks:install": "node scripts/install-git-hooks.mjs",
+    "hooks:verify": "node scripts/verify-git-hooks.mjs",
     "feature:new": "node scripts/create-feature.js",
     "report:validation": "node scripts/generate-validation-report.js"
   },
