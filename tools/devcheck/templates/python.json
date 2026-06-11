@@ -1,0 +1,12 @@
+{
+  "test_cmd": ["python", "-m", "pytest", "-v"],
+  "coverage_threshold": 80,
+
+  "git_check":          { "blocking": false },
+  "quality_gates":      { "blocking": true  },
+  "unit_tests":         { "blocking": true  },
+  "integration_tests":  { "blocking": true  },
+  "e2e_tests":          { "blocking": true  },
+  "coverage":           { "blocking": false },
+  "security_scan":      { "blocking": false }
+}

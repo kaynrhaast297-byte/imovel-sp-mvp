@@ -87,6 +87,7 @@ function checkDocs() {
     "DECISIONS.md",
     "ROADMAP.md",
     "AI_SCOREBOARD.md",
+    "QUALITY_GATE.md",
   ];
 
   const missing = docs.filter((file) => !existsSync(join(root, "docs", file)));
@@ -99,7 +100,19 @@ function checkPackageScripts(pkg) {
     return;
   }
 
-  const requiredScripts = ["test", "test:coverage", "build", "test:e2e", "check", "check:full"];
+  const requiredScripts = [
+    "test",
+    "test:devcheck",
+    "test:coverage",
+    "build",
+    "test:e2e",
+    "check",
+    "check:full",
+    "check:security",
+    "gate",
+    "gate:security",
+    "hooks:install",
+  ];
   const missing = requiredScripts.filter((script) => !pkg.scripts || !pkg.scripts[script]);
   add("scripts de teste", missing.length === 0 ? "OK" : "FAIL", missing.length === 0 ? requiredScripts.join(", ") : `Faltando: ${missing.join(", ")}`);
 }
@@ -108,8 +121,8 @@ async function checkOllama() {
   const baseUrl = process.env.OLLAMA_URL || "http://localhost:11434";
 
   if (typeof fetch !== "function") {
-    add("Ollama", "FAIL", "Fetch nativo indisponivel. Use Node 18+.");
-    add("modelo qwen2.5-coder", "FAIL", "Nao foi possivel consultar modelos.");
+    add("Ollama", "WARN", "Fetch nativo indisponivel. Ollama e opcional para o quality gate.", false);
+    add("modelo qwen2.5-coder", "WARN", "Nao foi possivel consultar modelos.", false);
     return;
   }
 
@@ -119,8 +132,8 @@ async function checkOllama() {
     });
 
     if (!response.ok) {
-      add("Ollama", "FAIL", `${baseUrl} respondeu HTTP ${response.status}.`);
-      add("modelo qwen2.5-coder", "FAIL", "Nao foi possivel consultar modelos.");
+      add("Ollama", "WARN", `${baseUrl} respondeu HTTP ${response.status}. Ollama e opcional para o quality gate.`, false);
+      add("modelo qwen2.5-coder", "WARN", "Nao foi possivel consultar modelos.", false);
       return;
     }
 
@@ -130,9 +143,9 @@ async function checkOllama() {
 
     add("Ollama", "OK", baseUrl);
     add("modelo qwen2.5-coder", hasCoderModel ? "OK" : "FAIL", hasCoderModel ? models.filter((name) => name.startsWith("qwen2.5-coder")).join(", ") : `Modelos encontrados: ${models.join(", ") || "nenhum"}`);
-  } catch (error) {
-    add("Ollama", "FAIL", `${baseUrl} indisponivel: ${error.message}`);
-    add("modelo qwen2.5-coder", "FAIL", "Nao foi possivel consultar modelos.");
+  } catch {
+    add("Ollama", "WARN", `${baseUrl} indisponivel. Ollama e opcional para o quality gate.`, false);
+    add("modelo qwen2.5-coder", "WARN", "Nao foi possivel consultar modelos.", false);
   }
 }
 
@@ -165,7 +178,13 @@ async function main() {
   checkCommand("Git", "git", ["--version"]);
 
   const pkg = readPackageJson();
-  add(".env.local", existsSync(join(root, ".env.local")) ? "OK" : "FAIL", existsSync(join(root, ".env.local")) ? "Arquivo encontrado." : "Arquivo nao encontrado.");
+  const hasLocalEnv = existsSync(join(root, ".env.local"));
+  add(
+    ".env.local",
+    hasLocalEnv ? "OK" : "WARN",
+    hasLocalEnv ? "Arquivo encontrado." : "Ausente neste worktree; use .env.example quando precisar de integracoes reais.",
+    false,
+  );
   checkDocs();
   checkPackageScripts(pkg);
 

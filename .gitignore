@@ -9,3 +9,7 @@ playwright-report
 .DS_Store
 *.log
 tsconfig.tsbuildinfo
+.devcheck/logs/
+.devcheck/ai-report.md
+__pycache__/
+*.pyc

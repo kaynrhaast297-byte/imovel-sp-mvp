@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "Executando o quality gate obrigatorio antes do push..."
+
+npm run gate
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  echo "Push bloqueado: o quality gate nao foi aprovado."
+  exit "$status"
+fi
+
+echo "Quality gate aprovado. Push liberado."

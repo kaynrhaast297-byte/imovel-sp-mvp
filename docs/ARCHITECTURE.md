@@ -24,6 +24,7 @@ lib/                 Tipos, validacao, Supabase, auth admin e utilitarios
 __tests__/           Testes unitarios, componentes e APIs
 e2e/                 Testes Playwright
 scripts/             Automacoes locais do projeto
+tools/devcheck/      Fonte versionada do portao profissional de qualidade
 docs/                Regras, arquitetura, planos e registros do AI Quality Lab
 reports/             Relatorios gerados por validacoes
 supabase/migrations/ Migrations incrementais do banco

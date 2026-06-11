@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevCheck Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #c9d1d9; --muted: #8b949e;
+    --pass: #3fb950; --fail: #f85149; --warn: #d29922;
+    --skip: #8b949e; --error: #ff7b72;
+    --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 14px; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 18px; color: var(--accent); letter-spacing: 2px; }
+  .badge { padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+  .live { background: #1a3a1a; color: var(--pass); border: 1px solid var(--pass); }
+  main { padding: 24px; display: grid; gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .card-header { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .card-header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .card-body { padding: 18px; }
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .status-item { padding: 12px; border-radius: 6px; border: 1px solid var(--border); }
+  .status-item .step-name { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .status-item .step-status { font-size: 16px; font-weight: 700; }
+  .status-item .step-msg { font-size: 11px; color: var(--muted); margin-top: 4px; word-break: break-word; }
+  .PASS   { border-color: var(--pass);  background: #0d2318; }
+  .FAIL   { border-color: var(--fail);  background: #2d1a1a; }
+  .WARN   { border-color: var(--warn);  background: #2d2210; }
+  .SKIPPED{ border-color: var(--skip);  background: #1a1a20; }
+  .ERROR  { border-color: var(--error); background: #2d1810; }
+  .PASS .step-status   { color: var(--pass); }
+  .FAIL .step-status   { color: var(--fail); }
+  .WARN .step-status   { color: var(--warn); }
+  .SKIPPED .step-status{ color: var(--skip); }
+  .ERROR .step-status  { color: var(--error); }
+  .overall-banner { padding: 16px 18px; font-size: 16px; font-weight: 700; border-radius: 6px; text-align: center; letter-spacing: 1px; }
+  .history-list { list-style: none; display: grid; gap: 8px; }
+  .history-item { padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.15s; }
+  .history-item:hover { border-color: var(--accent); }
+  .history-item .run-label { font-size: 13px; }
+  .history-item .run-time { font-size: 11px; color: var(--muted); }
+  pre.log-output { font-family: inherit; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto; background: var(--bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border); }
+  .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; font-family: inherit; font-size: 13px; transition: background 0.15s; }
+  .btn:hover { background: #1a2a3a; }
+  .btn-copy { border-color: var(--warn); color: var(--warn); }
+  .btn-copy:hover { background: #2d2210; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+  #live-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--pass); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .empty { color: var(--muted); text-align: center; padding: 32px; }
+</style>
+</head>
+<body>
+<header>
+  <div id="live-indicator"></div>
+  <h1>⚡ DEVCHECK</h1>
+  <span class="badge live">LIVE</span>
+  <span id="project-label" style="color:var(--muted);font-size:12px;margin-left:auto"></span>
+</header>
+<main>
+  <!-- Última execução -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Última Execução</h2>
+      <div class="toolbar">
+        <button class="btn btn-copy" onclick="copyToAI()">📋 Copiar para IA</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="overall-banner" class="overall-banner" style="display:none"></div>
+      <div id="steps-grid" class="status-grid" style="margin-top:12px"></div>
+      <div id="no-run" class="empty">Nenhuma execução ainda. Rode <code>devcheck quick</code> ou <code>devcheck full</code>.</div>
+    </div>
+  </div>
+
+  <!-- Log raw -->
+  <div class="card">
+    <div class="card-header"><h2>Log Completo</h2></div>
+    <div class="card-body">
+      <pre id="log-raw" class="log-output"><span style="color:var(--muted)">Aguardando execução...</span></pre>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="card">
+    <div class="card-header"><h2>Histórico de Execuções</h2></div>
+    <div class="card-body">
+      <ul id="history-list" class="history-list">
+        <li class="empty">Sem histórico</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<script>
+const STATUS_ICONS = {PASS:"✅",FAIL:"❌",WARN:"⚠️",SKIPPED:"⏭️",ERROR:"💥"};
+const STATUS_LABELS = {PASS:"PASS",FAIL:"FAIL",WARN:"WARN",SKIPPED:"SKIP",ERROR:"ERR"};
+let lastRawLog = "";
+
+function renderSteps(steps) {
+  const grid = document.getElementById("steps-grid");
+  grid.innerHTML = steps.map(s => `
+    <div class="status-item ${s.status}">
+      <div class="step-name">${s.name}</div>
+      <div class="step-status">${STATUS_ICONS[s.status]} ${STATUS_LABELS[s.status]}</div>
+      <div class="step-msg">${s.message || ""}</div>
+    </div>
+  `).join("");
+  document.getElementById("no-run").style.display = steps.length ? "none" : "";
+}
+
+function renderOverall(overall, approved) {
+  const el = document.getElementById("overall-banner");
+  const colors = {PASS:"#0d2318",FAIL:"#2d1a1a",WARN:"#2d2210",SKIPPED:"#1a1a20",ERROR:"#2d1810"};
+  const borders = {PASS:"#3fb950",FAIL:"#f85149",WARN:"#d29922",SKIPPED:"#8b949e",ERROR:"#ff7b72"};
+  el.style.display = "";
+  el.style.background = colors[overall] || "#1a1a1a";
+  el.style.borderLeft = `4px solid ${borders[overall] || "#8b949e"}`;
+  let text = `${STATUS_ICONS[overall]} ${overall}`;
+  if (approved === true)  text += "  —  ✅ APROVADO";
+  if (approved === false) text += "  —  ❌ REPROVADO";
+  el.textContent = text;
+}
+
+function renderHistory(runs) {
+  const ul = document.getElementById("history-list");
+  if (!runs.length) { ul.innerHTML = '<li class="empty">Sem histórico</li>'; return; }
+  ul.innerHTML = runs.map(r => `
+    <li class="history-item" onclick="loadRun('${r.filename}')">
+      <span class="run-label">${STATUS_ICONS[r.overall] || ""} ${r.command?.toUpperCase() || "RUN"} — ${r.project_name || ""}</span>
+      <span class="run-time">${r.timestamp || ""}</span>
+    </li>
+  `).join("");
+}
+
+async function loadRun(filename) {
+  const r = await fetch("/api/log/" + filename);
+  if (r.ok) {
+    const txt = await r.text();
+    document.getElementById("log-raw").textContent = txt;
+    lastRawLog = txt;
+  }
+}
+
+function copyToAI() {
+  const content = lastRawLog || document.getElementById("log-raw").textContent;
+  navigator.clipboard.writeText(content).then(() => {
+    const btn = document.querySelector(".btn-copy");
+    btn.textContent = "✅ Copiado!";
+    setTimeout(() => btn.textContent = "📋 Copiar para IA", 2000);
+  });
+}
+
+// SSE: atualização em tempo real
+const evtSource = new EventSource("/events");
+evtSource.addEventListener("update", e => {
+  const data = JSON.parse(e.data);
+  if (data.steps)   renderSteps(data.steps);
+  if (data.overall) renderOverall(data.overall, data.approved);
+  if (data.raw_log) { document.getElementById("log-raw").textContent = data.raw_log; lastRawLog = data.raw_log; }
+  if (data.history) renderHistory(data.history);
+  if (data.project) document.getElementById("project-label").textContent = data.project;
+});
+evtSource.onerror = () => { document.getElementById("live-indicator").style.background = "#f85149"; };
+
+// Carrega estado inicial
+(async () => {
+  const r = await fetch("/api/state");
+  if (r.ok) {
+    const data = await r.json();
+    if (data.steps)   renderSteps(data.steps);
+    if (data.overall) renderOverall(data.overall, data.approved);
+    if (data.raw_log) { document.getElementById("log-raw").textContent = data.raw_log; lastRawLog = data.raw_log; }
+    if (data.history) renderHistory(data.history);
+    if (data.project) document.getElementById("project-label").textContent = data.project;
+  }
+})();
+</script>
+</body>
+</html>
