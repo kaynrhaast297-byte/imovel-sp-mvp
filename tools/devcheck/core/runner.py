@@ -87,7 +87,12 @@ def layer_git(project: Path, cfg: dict) -> StepResult:
     from .git import check_git
     git_cfg = cfg.get("git_check", {})
     require_clean = isinstance(git_cfg, dict) and git_cfg.get("require_clean", False)
-    result = check_git(project, require_clean=require_clean)
+    check_committed_diff = isinstance(git_cfg, dict) and git_cfg.get("check_committed_diff", True)
+    result = check_git(
+        project,
+        require_clean=require_clean,
+        check_committed_diff=check_committed_diff,
+    )
     result.blocking = _get_blocking(cfg, "git_check")
     return result
 
@@ -261,4 +266,3 @@ def run_approve(project: Path, on_step: Callable | None = None) -> RunResult:
     result.command = "approve"
     result.approved = all(s.status == Status.PASS for s in result.steps)
     return result
-

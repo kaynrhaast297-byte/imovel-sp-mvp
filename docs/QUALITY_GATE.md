@@ -28,7 +28,7 @@ depois que o candidato foi commitado. Nada e enviado ao GitHub ate o gate final 
 
 | Camada DevCheck | Validacao executada | Bloqueia |
 |---|---|---|
-| Git Check | Segredos, arquivos sensiveis e working tree limpa | Sim |
+| Git Check | Segredos, arquivos sensiveis, diff commitado e working tree limpa | Sim |
 | Quality Gates | ESLint sem warnings e build de producao | Sim |
 | Unit Tests | Vitest | Sim |
 | Integration Tests | TypeScript e testes integrados | Sim |
@@ -41,6 +41,7 @@ depois que o candidato foi commitado. Nada e enviado ao GitHub ate o gate final 
 
 ```bash
 npm run hooks:install
+npm run hooks:verify
 npm run lint
 npm run type-check
 npm run test
@@ -52,6 +53,9 @@ npm run gate:security
 
 `npm run hooks:install` configura o hook versionado em `.githooks/pre-push`. Depois disso, todo
 `git push` chama automaticamente `npm run gate`.
+
+O E2E normal inicia um servidor isolado em uma porta livre e nunca reutiliza silenciosamente um
+servidor local desconhecido. Servidor externo so e aceito quando `PLAYWRIGHT_EXTERNAL_SERVER=1`.
 
 ## Evidencias
 

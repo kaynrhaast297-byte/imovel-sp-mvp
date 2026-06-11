@@ -6,7 +6,7 @@
   "security_cmd": ["npm", "audit", "--audit-level=low"],
   "coverage_threshold": 80,
 
-  "git_check":          { "blocking": true, "require_clean": true },
+  "git_check":          { "blocking": true, "require_clean": true, "check_committed_diff": true },
   "quality_gates":      { "blocking": true  },
   "unit_tests":         { "blocking": true  },
   "integration_tests":  { "blocking": true  },
