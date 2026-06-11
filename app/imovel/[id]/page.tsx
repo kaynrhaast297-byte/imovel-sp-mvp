@@ -1,15 +1,21 @@
 import Link from 'next/link'
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Bath,
+  BedDouble,
+  Building2,
+  CarFront,
+  Expand,
+  Heart,
+  MapPin,
+  Share2,
+} from 'lucide-react'
 import LeadForm from '@/components/LeadForm'
 import PriceAnalysis from '@/components/PriceAnalysis'
+import { propertyPhoto } from '@/lib/property-visual'
 import { getImovelById, getImovelSimilares } from '@/lib/supabase'
 import { calcularAnalise, calcularPrecoM2, formatarArea, formatarPreco, labelNegocio, labelTipo } from '@/lib/utils'
-
-function mediaLabel(tipo: string) {
-  if (tipo === 'casa') return 'Casa'
-  if (tipo === 'terreno') return 'Terreno'
-  if (tipo === 'comercial') return 'Comercial'
-  return 'Apto'
-}
 
 export default async function ImovelPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -22,91 +28,114 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
     analise = calcularAnalise(imovel, similares)
   } catch {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
-        <p>Imovel nao encontrado.</p>
-        <Link href="/" className="btn btn-ghost" style={{ marginTop: '1rem', display: 'inline-flex' }}>
-          Voltar
-        </Link>
+      <div className="search-state property-not-found">
+        <p className="eyebrow">Imovel indisponivel</p>
+        <h1>Imovel nao encontrado.</h1>
+        <Link href="/" className="btn btn-ghost"><ArrowLeft size={15} /> Voltar</Link>
       </div>
     )
   }
 
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
+  const attributes = [
+    { label: 'Area', value: formatarArea(imovel.area_m2), icon: Expand },
+    ...(imovel.quartos != null ? [{ label: 'Quartos', value: String(imovel.quartos), icon: BedDouble }] : []),
+    ...(imovel.banheiros != null ? [{ label: 'Banheiros', value: String(imovel.banheiros), icon: Bath }] : []),
+    ...(imovel.vagas != null ? [{ label: 'Vagas', value: String(imovel.vagas), icon: CarFront }] : []),
+    ...(precoM2 > 0 ? [{ label: 'Preco/m2', value: formatarPreco(precoM2), icon: Building2 }] : []),
+  ]
 
   return (
     <div className="property-page">
-      <Link href="/busca" className="property-back">
-        Voltar para busca
-      </Link>
+      <div className="property-topbar">
+        <Link href="/busca" className="property-back"><ArrowLeft size={15} />Voltar para busca</Link>
+        <div>
+          <button aria-label="Compartilhar imovel"><Share2 size={16} /> Compartilhar</button>
+          <button aria-label="Salvar imovel"><Heart size={16} /> Salvar</button>
+        </div>
+      </div>
+
+      <section className="property-gallery" aria-label="Galeria do imovel">
+        <div
+          className="property-gallery-main"
+          role="img"
+          aria-label={`Foto principal de ${imovel.titulo}`}
+          style={{ backgroundImage: `url(${propertyPhoto(imovel)})` }}
+        />
+        <div
+          className="property-gallery-secondary"
+          role="img"
+          aria-label={`Ambiente de ${imovel.titulo}`}
+          style={{ backgroundImage: `url(${propertyPhoto(imovel, 1)})` }}
+        />
+        <div
+          className="property-gallery-secondary"
+          role="img"
+          aria-label={`Detalhe de ${imovel.titulo}`}
+          style={{ backgroundImage: `url(${propertyPhoto(imovel, 2)})` }}
+        />
+      </section>
 
       <div className="property-detail-layout">
-        <div>
-          <div className="property-photo-placeholder">
-            {mediaLabel(imovel.tipo)}
+        <div className="property-main">
+          <div className="property-heading">
+            <div className="property-badges">
+              <span>{labelTipo(imovel.tipo)}</span>
+              <span>{labelNegocio(imovel.negocio)}</span>
+              {imovel.portal_origem && <span>{imovel.portal_origem}</span>}
+            </div>
+            <h1>{imovel.titulo}</h1>
+            <p><MapPin size={15} />{imovel.endereco ?? imovel.bairro}, {imovel.cidade} - {imovel.estado}</p>
           </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <span className="badge badge-blue">{labelTipo(imovel.tipo)}</span>
-            <span className="badge badge-yellow">{labelNegocio(imovel.negocio)}</span>
-            {imovel.portal_origem && (
-              <span className="badge" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                {imovel.portal_origem}
-              </span>
-            )}
-          </div>
-
-          <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.75rem', marginBottom: '0.5rem' }}>
-            {imovel.titulo}
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            {imovel.endereco ?? imovel.bairro}, {imovel.cidade} - {imovel.estado}
-          </p>
 
           <div className="property-attributes">
-            {[
-              { label: 'Area', valor: formatarArea(imovel.area_m2) },
-              ...(imovel.quartos != null ? [{ label: 'Quartos', valor: String(imovel.quartos) }] : []),
-              ...(imovel.banheiros != null ? [{ label: 'Banheiros', valor: String(imovel.banheiros) }] : []),
-              ...(imovel.vagas != null ? [{ label: 'Vagas', valor: String(imovel.vagas) }] : []),
-              ...(precoM2 > 0 ? [{ label: 'Preco/m2', valor: formatarPreco(precoM2) }] : []),
-            ].map((atributo) => (
-              <div key={atributo.label} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '0.875rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{atributo.label}</div>
-                <div style={{ fontWeight: 700, marginTop: '0.1rem' }}>{atributo.valor}</div>
+            {attributes.map(({ label, value, icon: Icon }) => (
+              <div key={label}>
+                <Icon size={18} />
+                <span>{label}</span>
+                <strong>{value}</strong>
               </div>
             ))}
           </div>
 
           {imovel.descricao && (
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
-              <h3 style={{ fontWeight: 600, marginBottom: '0.75rem' }}>Descricao</h3>
-              <p style={{ color: 'var(--text-muted)', lineHeight: 1.7, fontSize: '0.9rem' }}>{imovel.descricao}</p>
-            </div>
+            <section className="property-description">
+              <p className="eyebrow">Sobre o imovel</p>
+              <h2>Descricao</h2>
+              <p>{imovel.descricao}</p>
+            </section>
+          )}
+
+          {analise && (
+            <section className="property-analysis">
+              <div className="section-title-row">
+                <div>
+                  <p className="eyebrow">Inteligencia ImovelSP</p>
+                  <h2>Analise de preco</h2>
+                </div>
+              </div>
+              <PriceAnalysis analise={analise} />
+            </section>
           )}
         </div>
 
-        <div className="property-sidebar">
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>{formatarPreco(imovel.preco)}</div>
-            {imovel.negocio === 'aluguel' && <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>/mes</div>}
-            {imovel.condominio && <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>Condominio: {formatarPreco(imovel.condominio)}/mes</div>}
-            {imovel.iptu && <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>IPTU: {formatarPreco(imovel.iptu)}/ano</div>}
+        <aside className="property-sidebar">
+          <div className="property-price-panel">
+            <p>Valor do imovel</p>
+            <strong>{formatarPreco(imovel.preco)}</strong>
+            {imovel.negocio === 'aluguel' && <span>/mes</span>}
+            <div className="property-extra-costs">
+              {imovel.condominio && <span>Condominio <strong>{formatarPreco(imovel.condominio)}/mes</strong></span>}
+              {imovel.iptu && <span>IPTU <strong>{formatarPreco(imovel.iptu)}/ano</strong></span>}
+            </div>
             {imovel.url_original && (
-              <a href={imovel.url_original} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', display: 'flex' }}>
-                Ver anuncio original
+              <a href={imovel.url_original} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                Ver anuncio original <ArrowUpRight size={15} />
               </a>
             )}
           </div>
-
           <LeadForm imovelId={imovel.id} imovelTitulo={imovel.titulo} />
-
-          {analise && (
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem' }}>
-              <h3 style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '0.95rem' }}>Analise de preco</h3>
-              <PriceAnalysis analise={analise} />
-            </div>
-          )}
-        </div>
+        </aside>
       </div>
     </div>
   )
