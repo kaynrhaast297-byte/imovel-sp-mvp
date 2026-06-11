@@ -74,7 +74,13 @@ npm run test:watch
 npm run test:coverage
 npm run test:e2e
 npm run test:e2e:report
+npm run check:security
+npm run gate
 ```
+
+`npm run gate` executa o DevCheck em modo estrito e e obrigatorio antes de push, PR, merge ou
+finalizacao. Instale o hook versionado uma vez com `npm run hooks:install`. Consulte
+`docs/QUALITY_GATE.md` para a politica completa.
 
 ## Testes automatizados
 
@@ -136,6 +142,7 @@ O workflow `.github/workflows/ci.yml` roda em pushes para `master`, `main`, `dev
 - `npm run type-check`
 - `npm run build`
 - `npm run test:e2e` com relatorio HTML, execucao paralela no Ubuntu e snapshots visuais no Windows
+- `npm run check:security` com scan de segredos rastreados e `npm audit` sem vulnerabilidades aceitas
 
 ## Proximos passos
 

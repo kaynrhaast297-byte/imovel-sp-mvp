@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [master, main, develop, 'feature/**']
@@ -58,10 +61,33 @@ jobs:
       - name: TypeScript
         run: npm run type-check
 
+  security:
+    name: Seguranca
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Segredos e dependencias vulneraveis
+        run: npm run check:security
+
+      - name: Testar o proprio DevCheck
+        run: npm run test:devcheck
+
   build:
     name: Build Next.js
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test, lint, security]
 
     steps:
       - name: Checkout do codigo

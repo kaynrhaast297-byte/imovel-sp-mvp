@@ -12,6 +12,9 @@ Este documento e o contrato de trabalho das IAs no ImovelSP. Antes de qualquer a
 6. Separar seguranca, dados e UX em branches diferentes.
 7. Consistencia acima de velocidade.
 8. Sempre usar branch separada, testes obrigatorios e revisao por multiplas IAs.
+9. O DevCheck e o portao local obrigatorio e deve ser melhorado sempre que uma lacuna for descoberta.
+10. Nada esta pronto para push, PR, merge ou finalizacao sem `npm run gate` e CI remoto verdes.
+11. Nunca usar `--no-verify`, reduzir thresholds ou transformar falhas em avisos para liberar entrega.
 
 ## Fluxo obrigatorio de feature
 
@@ -25,7 +28,9 @@ Rodar build
 Revisar com Ollama
 Corrigir apontamentos
 Validar novamente
-Commit + push
+Commit local
+Rodar npm run gate
+Push
 Abrir PR para master
 ```
 
@@ -41,8 +46,10 @@ npm run test:e2e
 Para validacao completa em uma unica chamada:
 
 ```bash
-npm run check:full
+npm run gate
 ```
+
+O contrato detalhado do gate esta em `docs/QUALITY_GATE.md`.
 
 ## Papeis das IAs
 
@@ -60,7 +67,7 @@ npm run check:full
 | 1 - Livre | Explicar, documentar, criar testes e sugerir melhorias |
 | 2 - Com revisao | Componentes, paginas e refatoracoes pequenas |
 | 3 - Aprovacao obrigatoria | Auth, Supabase, RLS, Storage, APIs e CI/CD |
-| 4 - Proibido | Apagar testes para passar, expor `.env`, merge automatico e commit automatico sem pedido |
+| 4 - Proibido | Apagar testes para passar, expor `.env`, contornar o gate, merge automatico e commit automatico sem pedido |
 
 ## Regras de seguranca para IA
 

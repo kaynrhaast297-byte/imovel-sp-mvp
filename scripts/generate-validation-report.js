@@ -39,6 +39,7 @@ const generatedAt = new Date().toISOString();
 const commands = [
   ["Health check", "npm run health"],
   ["Fast check", "npm run check:fast"],
+  ["Mandatory local gate", "npm run gate"],
   ["Coverage", "npm run test:coverage"],
   ["Build", "npm run build"],
   ["E2E", "npm run test:e2e"],
@@ -68,7 +69,8 @@ Generated at: ${generatedAt}
 
 ## Checks
 
-Este script gera o relatorio, mas nao executa a suite. Rode os comandos abaixo e atualize a coluna de resultado.
+Este script gera o relatorio, mas nao executa a suite. Uma entrega so pode ser aprovada depois que
+\`npm run gate\` e o CI remoto passarem. Rode os comandos abaixo e atualize a coluna de resultado.
 
 | Check | Command | Result | Notes |
 |---|---|---|---|
