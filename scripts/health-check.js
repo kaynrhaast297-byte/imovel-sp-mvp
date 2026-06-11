@@ -112,6 +112,7 @@ function checkPackageScripts(pkg) {
     "gate",
     "gate:security",
     "hooks:install",
+    "hooks:verify",
   ];
   const missing = requiredScripts.filter((script) => !pkg.scripts || !pkg.scripts[script]);
   add("scripts de teste", missing.length === 0 ? "OK" : "FAIL", missing.length === 0 ? requiredScripts.join(", ") : `Faltando: ${missing.join(", ")}`);

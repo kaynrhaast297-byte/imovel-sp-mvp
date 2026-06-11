@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.detector import load_devcheck_config
-from core.git import _run as run_git
+from core.git import _committed_diff_issue, _run as run_git
 from core.models import RunResult, Status, StepResult
 from core.runner import _run_cmd, layer_coverage, run_approve, run_full
 
@@ -110,6 +110,31 @@ class ProfessionalGateTests(unittest.TestCase):
         command = subprocess_run.call_args.args[0]
         self.assertEqual(command[0:2], ["git", "-c"])
         self.assertTrue(command[2].startswith("safe.directory="))
+
+    def test_committed_diff_whitespace_is_reported(self):
+        responses = [
+            (0, "head-sha", ""),
+            (0, "origin/master", ""),
+            (0, "base-sha", ""),
+            (2, "tools/devcheck/core/runner.py: new blank line at EOF.", ""),
+        ]
+
+        with patch("core.git._run", side_effect=responses):
+            issue = _committed_diff_issue(Path("."))
+
+        self.assertIn("new blank line at EOF", issue)
+
+    def test_committed_diff_is_empty_when_head_matches_base(self):
+        responses = [
+            (0, "head-sha", ""),
+            (0, "origin/master", ""),
+            (0, "head-sha", ""),
+        ]
+
+        with patch("core.git._run", side_effect=responses):
+            issue = _committed_diff_issue(Path("."))
+
+        self.assertEqual(issue, "")
 
 
 if __name__ == "__main__":

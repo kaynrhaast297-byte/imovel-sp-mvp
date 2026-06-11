@@ -68,6 +68,8 @@ jobs:
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -80,6 +82,9 @@ jobs:
 
       - name: Segredos e dependencias vulneraveis
         run: npm run check:security
+
+      - name: Verificar whitespace do diff da branch
+        run: git diff --check origin/master...HEAD
 
       - name: Testar o proprio DevCheck
         run: npm run test:devcheck

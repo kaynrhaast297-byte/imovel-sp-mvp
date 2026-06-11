@@ -1,11 +1,11 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
+import { createServer } from 'node:net'
 import process from 'node:process'
 import { setTimeout as delay } from 'node:timers/promises'
 
 const host = process.env.PLAYWRIGHT_HOST ?? 'localhost'
-const port = process.env.PORT ?? '3000'
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://${host}:${port}`
+const externalServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER === '1'
 const timeoutMs = 120_000
 const e2eAdminToken = process.env.E2E_ADMIN_TOKEN ?? 'e2e-admin-token'
 const e2eEnv = {
@@ -14,6 +14,26 @@ const e2eEnv = {
   E2E_MOCKS: '1',
   IMOVEL_ADMIN_TOKEN: e2eAdminToken,
 }
+
+async function availablePort() {
+  return new Promise((resolve, reject) => {
+    const server = createServer()
+    server.unref()
+    server.on('error', reject)
+    server.listen(0, host, () => {
+      const address = server.address()
+      const port = typeof address === 'object' && address ? address.port : null
+      server.close(error => {
+        if (error) reject(error)
+        else if (port) resolve(String(port))
+        else reject(new Error('Nao foi possivel reservar uma porta para o E2E.'))
+      })
+    })
+  })
+}
+
+const port = process.env.PORT ?? (externalServer ? '3000' : await availablePort())
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://${host}:${port}`
 
 if (!existsSync('.next/BUILD_ID')) {
   console.error('Build de producao nao encontrado. Rode npm run build antes de npm run test:e2e.')
@@ -87,10 +107,16 @@ let serverProcess
 let ownsServer = false
 
 try {
-  if (await isAvailable()) {
-    console.log(`Reutilizando servidor existente em ${baseURL}`)
+  if (externalServer) {
+    if (!(await isAvailable())) {
+      throw new Error(`PLAYWRIGHT_EXTERNAL_SERVER=1, mas nenhum servidor respondeu em ${baseURL}.`)
+    }
+    console.log(`Usando servidor externo solicitado em ${baseURL}`)
   } else {
-    console.log(`Iniciando Next.js em ${baseURL}`)
+    if (await isAvailable()) {
+      throw new Error(`A porta isolada do E2E ja esta ocupada em ${baseURL}.`)
+    }
+    console.log(`Iniciando servidor E2E isolado em ${baseURL}`)
     ownsServer = true
     serverProcess = spawn(
       process.execPath,

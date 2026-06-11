@@ -5,7 +5,7 @@
   "coverage_cmd": ["npm", "run", "test:coverage"],
   "security_cmd": ["npm", "run", "check:security"],
   "coverage_threshold": 90,
-  "git_check": { "blocking": true, "require_clean": true },
+  "git_check": { "blocking": true, "require_clean": true, "check_committed_diff": true },
   "quality_gates": { "blocking": true },
   "unit_tests": { "blocking": true },
   "integration_tests": { "blocking": true },
