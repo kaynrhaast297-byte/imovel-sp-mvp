@@ -60,6 +60,15 @@ describe('ImovelCard', () => {
   it('nao mostra preco por m2 quando area e zero', () => {
     render(<ImovelCard imovel={{ ...imovel, area_m2: 0 }} />)
 
+    expect(screen.getByText('Area nao informada')).toBeInTheDocument()
     expect(screen.queryByText('por m2')).not.toBeInTheDocument()
+  })
+
+  it('usa a foto principal quando ela existe', () => {
+    render(<ImovelCard imovel={{ ...imovel, foto_principal: 'https://example.com/principal.jpg' }} />)
+
+    expect(screen.getByRole('img', { name: /foto principal/i })).toHaveStyle({
+      backgroundImage: 'url("https://example.com/principal.jpg")',
+    })
   })
 })

@@ -27,6 +27,11 @@ const validImovel = {
   bairro: 'Pinheiros',
   cidade: 'Sao Paulo',
   estado: 'sp',
+  cep: '05422-000',
+  endereco: 'Rua dos Pinheiros',
+  numero: '100',
+  fotos: ['https://example.com/foto.jpg'],
+  foto_principal: 'https://example.com/foto.jpg',
 }
 
 function makeJsonRequest(body: unknown) {
@@ -120,10 +125,50 @@ describe('POST /api/imoveis', () => {
       bairro: 'Pinheiros',
       cidade: 'Sao Paulo',
       estado: 'SP',
+      cep: '05422-000',
+      endereco: 'Rua dos Pinheiros',
+      numero: '100',
+      localizacao_aproximada: true,
+      fotos: ['https://example.com/foto.jpg'],
+      foto_principal: 'https://example.com/foto.jpg',
       status: 'ativo',
       created_at: expect.any(String),
       updated_at: expect.any(String),
     })
+  })
+
+  it('cria terreno com dados parciais sem inventar CEP, endereco ou area', async () => {
+    const imovelCriado = { id: 'imovel-terreno', titulo: 'Terreno no Itaim Paulista', status: 'ativo' }
+    mocks.createImovel.mockResolvedValueOnce(imovelCriado)
+
+    const res = await POST(makeJsonRequest({
+      titulo: 'Terreno a venda no Itaim Paulista proximo a estacao',
+      tipo: 'terreno',
+      negocio: 'venda',
+      preco: 270000,
+      bairro: 'Itaim Paulista',
+      cidade: 'Sao Paulo',
+      estado: 'SP',
+      descricao: 'Terreno proximo a estacao, UPA, padaria, escolas e comercio local.',
+      fotos: ['https://example.com/terreno.jpg'],
+      foto_principal: 'https://example.com/terreno.jpg',
+    }))
+    const json = await res.json()
+
+    expect(res.status).toBe(201)
+    expect(json.imovel).toEqual(imovelCriado)
+    expect(mocks.createImovel).toHaveBeenCalledWith(expect.objectContaining({
+      titulo: 'Terreno a venda no Itaim Paulista proximo a estacao',
+      tipo: 'terreno',
+      negocio: 'venda',
+      preco: 270000,
+      bairro: 'Itaim Paulista',
+      cidade: 'Sao Paulo',
+      estado: 'SP',
+      localizacao_aproximada: true,
+      status: 'ativo',
+    }))
+    expect(JSON.stringify(mocks.createImovel.mock.calls[0][0])).not.toContain('08115-100')
   })
 
   it('rejeita campos ausentes ou nao permitidos', async () => {

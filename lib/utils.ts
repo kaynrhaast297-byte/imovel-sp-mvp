@@ -8,11 +8,12 @@ export function formatarPreco(valor: number): string {
   })
 }
 
-export function formatarArea(m2: number): string {
+export function formatarArea(m2?: number | null): string {
+  if (!m2 || m2 <= 0) return 'Area nao informada'
   return `${m2} m2`
 }
 
-export function calcularPrecoM2(preco: number, area: number): number {
+export function calcularPrecoM2(preco: number, area?: number | null): number {
   if (!area || area === 0) return 0
   return Math.round(preco / area)
 }
@@ -53,14 +54,15 @@ function montarRecomendacao(classificacao: AnalisePreco['classificacao'], confia
 }
 
 export function calcularAnalise(imovel: Imovel, similares: ImovelSimilar[]): AnalisePreco {
-  const precoM2Imovel = calcularPrecoM2(imovel.preco, imovel.area_m2)
+  const areaImovel = imovel.area_m2 && imovel.area_m2 > 0 ? imovel.area_m2 : 0
+  const precoM2Imovel = calcularPrecoM2(imovel.preco, areaImovel)
   const similaresValidos = similares.filter((similar) => similar.preco > 0 && similar.area_m2 > 0)
   const precos = similaresValidos.map((similar) => similar.preco)
   const precosM2 = similaresValidos.map((similar) => calcularPrecoM2(similar.preco, similar.area_m2))
   const precoMedioBairro = media(precos) || imovel.preco
   const precoM2MedioBairro = media(precosM2) || precoM2Imovel
   const precoM2MedianoBairro = mediana(precosM2) || precoM2Imovel
-  const precoEstimadoJusto = Math.round(precoM2MedianoBairro * imovel.area_m2)
+  const precoEstimadoJusto = Math.round(precoM2MedianoBairro * areaImovel)
   const percentualDiferenca = precoEstimadoJusto
     ? Math.round(((imovel.preco - precoEstimadoJusto) / precoEstimadoJusto) * 100)
     : 0
@@ -121,9 +123,10 @@ export function slugify(texto: string): string {
 }
 
 export function calcularPrecoM2Medio(imoveis: Imovel[]): number {
-  if (imoveis.length === 0) return 0
-  const total = imoveis.reduce((sum, imovel) => sum + (imovel.preco / imovel.area_m2), 0)
-  return Math.round(total / imoveis.length)
+  const imoveisComArea = imoveis.filter((imovel) => imovel.area_m2 && imovel.area_m2 > 0)
+  if (imoveisComArea.length === 0) return 0
+  const total = imoveisComArea.reduce((sum, imovel) => sum + (imovel.preco / imovel.area_m2!), 0)
+  return Math.round(total / imoveisComArea.length)
 }
 
 export function analisarPreco(imovel: Imovel, mediaReferencia: number) {

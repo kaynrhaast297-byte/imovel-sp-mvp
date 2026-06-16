@@ -12,7 +12,7 @@ export interface Imovel {
   preco: number
   condominio?: number
   iptu?: number
-  area_m2: number
+  area_m2?: number
   quartos?: number
   banheiros?: number
   vagas?: number
@@ -21,9 +21,13 @@ export interface Imovel {
   estado: string
   cep?: string
   endereco?: string
+  numero?: string
+  complemento?: string
   latitude?: number
   longitude?: number
+  localizacao_aproximada?: boolean
   fotos?: string[]
+  foto_principal?: string
   portal_origem?: string
   url_original?: string
   created_at: string

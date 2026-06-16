@@ -1,5 +1,10 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { e2eImovel, e2eImoveisSimilares } from './e2e-fixtures'
+import {
+  createPropertyImagePath,
+  PROPERTY_IMAGES_BUCKET,
+  type PropertyImageFile,
+} from './property-images'
 import type { Imovel, ImovelSimilar } from './types'
 
 let publicClient: SupabaseClient | null = null
@@ -165,6 +170,41 @@ export async function deleteImovel(id: string) {
   if (error) throw error
 }
 
+export async function uploadPropertyImages(files: PropertyImageFile[]) {
+  const storage = getAdminClient().storage.from(PROPERTY_IMAGES_BUCKET)
+  const uploaded: { path: string; url: string }[] = []
+
+  try {
+    for (const file of files) {
+      const path = createPropertyImagePath(file)
+      const { error } = await storage.upload(path, Buffer.from(await file.arrayBuffer()), {
+        cacheControl: '31536000',
+        contentType: file.type,
+        upsert: false,
+      })
+      if (error) throw error
+
+      const { data } = storage.getPublicUrl(path)
+      uploaded.push({ path, url: data.publicUrl })
+    }
+  } catch (error) {
+    if (uploaded.length > 0) {
+      await storage.remove(uploaded.map(image => image.path)).catch(() => null)
+    }
+    throw error
+  }
+
+  return uploaded
+}
+
+export async function removePropertyImages(paths: string[]) {
+  if (paths.length === 0) return
+  const { error } = await getAdminClient().storage
+    .from(PROPERTY_IMAGES_BUCKET)
+    .remove(paths)
+  if (error) throw error
+}
+
 // Leads
 
 export async function createLead(lead: Record<string, unknown>) {
@@ -175,6 +215,25 @@ export async function createLead(lead: Record<string, unknown>) {
   return { ok: true }
 }
 
+export async function getLeads(pagina = 1, porPagina = 20) {
+  const from = (pagina - 1) * porPagina
+  const to = from + porPagina - 1
+
+  const { data, error, count } = await getAdminClient()
+    .from('leads')
+    .select('*, imoveis(id, titulo)', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (error) throw error
+
+  return {
+    leads: data ?? [],
+    total: count ?? 0,
+    totalPaginas: Math.max(Math.ceil((count ?? 0) / porPagina), 1),
+  }
+}
+
 // Analise de preco
 
 async function consultarSimilares(
@@ -182,6 +241,7 @@ async function consultarSimilares(
   escopo: 'bairro' | 'cidade',
   quartosExatos: boolean,
 ) {
+  const area = imovel.area_m2 ?? 0
   let query = getPublicClient()
     .from('imoveis')
     .select('id, titulo, preco, area_m2, quartos, bairro, cidade, tipo, negocio, portal_origem, url_original')
@@ -189,8 +249,8 @@ async function consultarSimilares(
     .eq('negocio', imovel.negocio)
     .eq('status', 'ativo')
     .neq('id', imovel.id)
-    .gte('area_m2', imovel.area_m2 * 0.7)
-    .lte('area_m2', imovel.area_m2 * 1.3)
+    .gte('area_m2', area * 0.7)
+    .lte('area_m2', area * 1.3)
     .order('preco', { ascending: true })
 
   if (escopo === 'bairro') query = query.eq('bairro', imovel.bairro)
@@ -205,6 +265,10 @@ async function consultarSimilares(
 export async function getImovelSimilares(imovel: Imovel): Promise<ImovelSimilar[]> {
   if (isE2EMockEnabled() && imovel.id === e2eImovel.id) {
     return e2eImoveisSimilares
+  }
+
+  if (!imovel.area_m2 || imovel.area_m2 <= 0) {
+    return []
   }
 
   const grupos = await Promise.all([

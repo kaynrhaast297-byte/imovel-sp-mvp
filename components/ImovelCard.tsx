@@ -17,7 +17,7 @@ export default function ImovelCard({ imovel }: Props) {
         <div
           className="property-card-media"
           role="img"
-          aria-label={`Foto de ${imovel.titulo}`}
+          aria-label={`Foto principal de ${imovel.titulo}`}
           style={{ backgroundImage: `url(${propertyPhoto(imovel)})` }}
         >
           <div className="property-card-badges">

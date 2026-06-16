@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
 
     const imovel = await createImovel({
       ...parsed.data,
+      localizacao_aproximada: parsed.data.localizacao_aproximada ?? true,
       status: 'ativo',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

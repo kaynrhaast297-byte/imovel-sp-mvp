@@ -71,7 +71,7 @@ export default function PriceAnalysis({ analise }: Props) {
               <div key={similar.id} className="comparable-row">
                 <div>
                   <strong>{similar.titulo}</strong>
-                  <span>{similar.area_m2}m2 · {similar.bairro}</span>
+                  <span>{similar.area_m2}m2 - {similar.bairro}</span>
                 </div>
                 <div>
                   <strong>{formatarPreco(similar.preco)}</strong>

@@ -17,7 +17,7 @@ create table if not exists imoveis (
   preco numeric not null check (preco >= 0),
   condominio numeric check (condominio is null or condominio >= 0),
   iptu numeric check (iptu is null or iptu >= 0),
-  area_m2 numeric not null check (area_m2 > 0),
+  area_m2 numeric check (area_m2 is null or area_m2 > 0),
   quartos integer check (quartos is null or quartos >= 0),
   banheiros integer check (banheiros is null or banheiros >= 0),
   vagas integer check (vagas is null or vagas >= 0),
@@ -26,14 +26,25 @@ create table if not exists imoveis (
   estado text not null default 'SP',
   cep text,
   endereco text,
+  numero text,
+  complemento text,
   latitude numeric,
   longitude numeric,
+  localizacao_aproximada boolean not null default true,
   fotos text[] default '{}'::text[],
+  foto_principal text,
   portal_origem text,
   url_original text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table imoveis
+  drop constraint if exists imoveis_foto_principal_em_fotos;
+
+alter table imoveis
+  add constraint imoveis_foto_principal_em_fotos
+  check (foto_principal is null or foto_principal = any(fotos));
 
 alter table imoveis
   add column if not exists preco_m2 numeric
@@ -139,3 +150,22 @@ create policy "Leads escrita via service role"
   to service_role
   using (true)
   with check (true);
+
+insert into storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
+values (
+  'property-images',
+  'property-images',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
