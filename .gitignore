@@ -13,3 +13,5 @@ tsconfig.tsbuildinfo
 .devcheck/ai-report.md
 __pycache__/
 *.pyc
+.vercel
+.local/

@@ -24,8 +24,10 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
 
   try {
     imovel = await getImovelById(id)
-    const similares = await getImovelSimilares(imovel)
-    analise = calcularAnalise(imovel, similares)
+    if (imovel.area_m2 && imovel.area_m2 > 0) {
+      const similares = await getImovelSimilares(imovel)
+      analise = calcularAnalise(imovel, similares)
+    }
   } catch {
     return (
       <div className="search-state property-not-found">
@@ -37,6 +39,9 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
   }
 
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
+  const localizacao = imovel.localizacao_aproximada
+    ? `${imovel.bairro}, ${imovel.cidade} - ${imovel.estado}`
+    : `${imovel.endereco ?? imovel.bairro}${imovel.numero ? `, ${imovel.numero}` : ''}, ${imovel.cidade} - ${imovel.estado}`
   const attributes = [
     { label: 'Area', value: formatarArea(imovel.area_m2), icon: Expand },
     ...(imovel.quartos != null ? [{ label: 'Quartos', value: String(imovel.quartos), icon: BedDouble }] : []),
@@ -85,7 +90,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
               {imovel.portal_origem && <span>{imovel.portal_origem}</span>}
             </div>
             <h1>{imovel.titulo}</h1>
-            <p><MapPin size={15} />{imovel.endereco ?? imovel.bairro}, {imovel.cidade} - {imovel.estado}</p>
+            <p><MapPin size={15} />{localizacao}</p>
           </div>
 
           <div className="property-attributes">

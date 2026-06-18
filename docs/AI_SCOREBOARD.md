@@ -17,7 +17,8 @@ Use este quadro para registrar revisoes e qualidade por feature.
 | Data | Branch | Feature | Codex | Claude/ChatGPT | Ollama | Humano | Nota | Status |
 |---|---|---|---|---|---|---|---|---|
 | 2026-06-08 | `feature/security-tests` | Seguranca das APIs e painel admin | Validado | Revisado | Auditado | Aprovado | 10/10 | Mergeado - CI verde |
-| 2026-06-08 | `feature/ai-quality-lab` | Estrutura inicial do AI Quality Lab | Validado | Pendente | Health check verde | Pendente | 8/10 | PR pendente |
+| 2026-06-08 | `feature/ai-quality-lab` | Estrutura inicial do AI Quality Lab | Validado | Revisado | Health check verde | Aprovado | 10/10 | Mergeado - CI verde |
+| 2026-06-08 | `feature/property-data` | Dados reais, Storage, upload e geocodificacao | Validado | Pendente | Revisado sem achado concreto | Pendente | 9/10 | Aguarda migration e imovel real |
 
 ## Como usar
 

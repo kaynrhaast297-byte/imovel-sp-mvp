@@ -63,6 +63,7 @@ describe('utils', () => {
   it('calcula preco por m2 e evita divisao por zero', () => {
     expect(calcularPrecoM2(900000, 90)).toBe(10000)
     expect(calcularPrecoM2(900000, 0)).toBe(0)
+    expect(calcularPrecoM2(900000, undefined)).toBe(0)
   })
 
   it('classifica oportunidade abaixo da referencia de similares', () => {
@@ -135,6 +136,7 @@ describe('utils', () => {
     expect(formatarMoeda(1234.5)).toMatch(/1\.234,50/)
     expect(formatarNumero(1234)).toBe('1.234')
     expect(formatarArea(90)).toBe('90 m2')
+    expect(formatarArea(undefined)).toBe('Area nao informada')
     expect(labelTipo('apartamento')).toBe('Apartamento')
     expect(labelTipo('fazenda')).toBe('fazenda')
     expect(labelNegocio('aluguel')).toBe('Aluguel')
@@ -147,6 +149,7 @@ describe('utils', () => {
       imovelBase,
       { ...imovelBase, id: 'imovel-2', preco: 1000000, area_m2: 100 },
     ])).toBe(9250)
+    expect(calcularPrecoM2Medio([{ ...imovelBase, area_m2: undefined }])).toBe(0)
 
     expect(analisarPreco(imovelBase, 700000)).toMatchObject({ status: 'caro', percentual: 21 })
     expect(analisarPreco(imovelBase, 1000000)).toMatchObject({ status: 'barato', percentual: -15 })

@@ -30,8 +30,8 @@ function hash(value: string) {
   return Array.from(value).reduce((total, char) => total + char.charCodeAt(0), 0)
 }
 
-export function propertyPhoto(imovel: Pick<Imovel, 'id' | 'tipo' | 'fotos'>, index = 0) {
-  const photos = imovel.fotos?.filter(Boolean)
+export function propertyPhoto(imovel: Pick<Imovel, 'id' | 'tipo' | 'fotos' | 'foto_principal'>, index = 0) {
+  const photos = [imovel.foto_principal, ...(imovel.fotos ?? [])].filter(Boolean)
   if (photos?.length) return photos[index % photos.length]
 
   const fallback = fallbackPhotos[imovel.tipo] ?? fallbackPhotos.apartamento

@@ -56,7 +56,7 @@ function BuscaConteudo() {
     return [...imoveis].sort((a, b) => {
       if (ordenacao === 'preco_m2_asc') return calcularPrecoM2(a.preco, a.area_m2) - calcularPrecoM2(b.preco, b.area_m2)
       if (ordenacao === 'preco_asc') return a.preco - b.preco
-      if (ordenacao === 'area_desc') return b.area_m2 - a.area_m2
+      if (ordenacao === 'area_desc') return (b.area_m2 ?? 0) - (a.area_m2 ?? 0)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
   }, [imoveis, ordenacao])
