@@ -79,12 +79,25 @@ npm run test:coverage
 npm run test:e2e
 npm run test:e2e:report
 npm run check:security
+npm run env:check:template
 npm run gate
 ```
 
 `npm run gate` executa o DevCheck em modo estrito e e obrigatorio antes de push, PR, merge ou
 finalizacao. Instale o hook versionado uma vez com `npm run hooks:install`. Consulte
 `docs/QUALITY_GATE.md` para a politica completa.
+
+Para mudancas em `/admin`, Supabase, Storage, leads, cadastro de imoveis ou variaveis da Vercel,
+valide tambem o deploy real:
+
+```bash
+npm run env:check:production
+npm run vercel:smoke
+```
+
+O smoke confirma que o `IMOVEL_ADMIN_TOKEN` local confere com a Vercel Production e que a chave
+server-side do Supabase esta disponivel no deploy. O procedimento completo esta em
+[`docs/VERCEL_ENVIRONMENT.md`](docs/VERCEL_ENVIRONMENT.md).
 
 ## Testes automatizados
 
@@ -98,7 +111,7 @@ npm run test:coverage
 
 O relatorio visual de cobertura e gerado em `coverage/index.html`. A interface `vitest --ui` e opcional e requer instalar `@vitest/ui` separadamente.
 
-Sao 84 testes cobrindo regras de preco, adaptador Supabase, sessao administrativa, rate limit, componentes e contratos das APIs de IA, analise, imoveis e leads. O escopo de cobertura dos modulos criticos e explicito em `vitest.config.ts`, com thresholds que bloqueiam regressoes no CI.
+Sao 119 testes cobrindo regras de preco, adaptador Supabase, ambiente Vercel, sessao administrativa, rate limit, componentes e contratos das APIs de IA, analise, imoveis e leads. O escopo de cobertura dos modulos criticos e explicito em `vitest.config.ts`, com thresholds que bloqueiam regressoes no CI.
 
 ## Testes end-to-end
 

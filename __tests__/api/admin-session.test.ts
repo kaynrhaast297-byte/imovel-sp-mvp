@@ -45,6 +45,14 @@ describe('/api/admin/session', () => {
     expect(extraField.status).toBe(400)
   })
 
+  it('retorna configuracao ausente quando token admin nao existe no ambiente', async () => {
+    const response = await POST(request('POST', { token: 'qualquer' }))
+    const json = await response.json()
+
+    expect(response.status).toBe(503)
+    expect(json.error).toMatch(/IMOVEL_ADMIN_TOKEN/)
+  })
+
   it('rejeita JSON malformado e informa sessao ausente sem erro de console no browser', async () => {
     process.env.IMOVEL_ADMIN_TOKEN = 'segredo'
     const malformed = new NextRequest('http://localhost/api/admin/session', {

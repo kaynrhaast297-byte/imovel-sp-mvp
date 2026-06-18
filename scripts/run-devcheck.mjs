@@ -2,17 +2,12 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
+import { getPythonCandidates } from './python-runtime.mjs'
 
 const command = process.argv[2] ?? 'approve'
 const cliPath = resolve(process.env.DEVCHECK_CLI ?? 'tools/devcheck/cli/main.py')
 const logPath = resolve('.devcheck/logs/ultima-execucao.txt')
-const pythonCandidates = [
-  process.env.DEVCHECK_PYTHON,
-  'C:/Users/jonathan/AppData/Local/Programs/Python/Python312/python.exe',
-  'python3',
-  'python',
-  'py',
-].filter(Boolean)
+const pythonCandidates = getPythonCandidates()
 
 if (!existsSync(cliPath)) {
   console.error(`DevCheck nao encontrado em ${cliPath}.`)
