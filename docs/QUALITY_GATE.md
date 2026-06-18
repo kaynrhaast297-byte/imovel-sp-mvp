@@ -47,6 +47,7 @@ npm run type-check
 npm run test
 npm run build
 npm run check:security
+npm run env:check:template
 npm run gate
 npm run gate:security
 ```
@@ -56,6 +57,16 @@ npm run gate:security
 
 O E2E normal inicia um servidor isolado em uma porta livre e nunca reutiliza silenciosamente um
 servidor local desconhecido. Servidor externo so e aceito quando `PLAYWRIGHT_EXTERNAL_SERVER=1`.
+
+Para mudancas que dependem do ambiente Vercel/Supabase em producao, rode tambem depois do deploy:
+
+```bash
+npm run env:check:production
+npm run vercel:smoke
+```
+
+Esse smoke e obrigatorio para alteracoes em admin, leads, storage, cadastro de imoveis ou env vars
+da Vercel. Ele nao substitui o DevCheck; ele valida o deploy real.
 
 ## Evidencias
 

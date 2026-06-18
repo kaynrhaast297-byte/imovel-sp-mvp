@@ -33,6 +33,10 @@ function npmCommand(args) {
   return run('npm', args)
 }
 
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
 function trackedFiles() {
   const result = run('git', [
     '-c',
@@ -82,35 +86,53 @@ function scanTrackedFiles() {
 }
 
 function auditDependencies() {
-  const result = npmCommand(['audit', '--json'])
+  const maxAttempts = 3
 
-  let report
-  try {
-    report = JSON.parse(result.stdout || '{}')
-  } catch {
-    console.error('Security check: npm audit nao retornou um relatorio JSON valido.')
-    console.error((result.stderr || result.stdout || '').trim())
-    return false
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const result = npmCommand(['audit', '--json'])
+
+    let report
+    try {
+      report = JSON.parse(result.stdout || '{}')
+    } catch {
+      if (attempt < maxAttempts) {
+        console.warn(`Security check: npm audit retornou JSON invalido; nova tentativa ${attempt + 1}/${maxAttempts}.`)
+        sleep(1000)
+        continue
+      }
+
+      console.error('Security check: npm audit nao retornou um relatorio JSON valido.')
+      console.error((result.stderr || result.stdout || '').trim())
+      return false
+    }
+
+    if (report.error) {
+      if (attempt < maxAttempts) {
+        console.warn(`Security check: npm audit indisponivel; nova tentativa ${attempt + 1}/${maxAttempts}.`)
+        sleep(1000)
+        continue
+      }
+
+      console.error(`Security check: npm audit indisponivel: ${report.error.summary || report.error.message || 'erro desconhecido'}`)
+      return false
+    }
+
+    const vulnerabilities = report.metadata?.vulnerabilities ?? {}
+    const total = Number(vulnerabilities.total ?? 0)
+    if (total > 0 || result.status !== 0) {
+      console.error(
+        `Security check: ${total} vulnerabilidade(s) encontrada(s) ` +
+        `(critical=${vulnerabilities.critical ?? 0}, high=${vulnerabilities.high ?? 0}, ` +
+        `moderate=${vulnerabilities.moderate ?? 0}, low=${vulnerabilities.low ?? 0}).`,
+      )
+      return false
+    }
+
+    console.log('Security check: npm audit sem vulnerabilidades conhecidas.')
+    return true
   }
 
-  if (report.error) {
-    console.error(`Security check: npm audit indisponivel: ${report.error.summary || report.error.message || 'erro desconhecido'}`)
-    return false
-  }
-
-  const vulnerabilities = report.metadata?.vulnerabilities ?? {}
-  const total = Number(vulnerabilities.total ?? 0)
-  if (total > 0 || result.status !== 0) {
-    console.error(
-      `Security check: ${total} vulnerabilidade(s) encontrada(s) ` +
-      `(critical=${vulnerabilities.critical ?? 0}, high=${vulnerabilities.high ?? 0}, ` +
-      `moderate=${vulnerabilities.moderate ?? 0}, low=${vulnerabilities.low ?? 0}).`,
-    )
-    return false
-  }
-
-  console.log('Security check: npm audit sem vulnerabilidades conhecidas.')
-  return true
+  return false
 }
 
 const secretsOk = scanTrackedFiles()
