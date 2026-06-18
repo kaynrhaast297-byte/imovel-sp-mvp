@@ -1,13 +1,8 @@
 import { spawnSync } from 'node:child_process'
 import process from 'node:process'
+import { getPythonCandidates } from './python-runtime.mjs'
 
-const pythonCandidates = [
-  process.env.DEVCHECK_PYTHON,
-  'C:/Users/jonathan/AppData/Local/Programs/Python/Python312/python.exe',
-  'python3',
-  'python',
-  'py',
-].filter(Boolean)
+const pythonCandidates = getPythonCandidates()
 
 let result
 let selectedPython

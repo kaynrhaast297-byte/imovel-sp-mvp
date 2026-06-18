@@ -5,37 +5,24 @@ import {
   PROPERTY_IMAGES_BUCKET,
   type PropertyImageFile,
 } from './property-images'
+import { getSupabaseAdminEnv, getSupabasePublicEnv } from './runtime-env'
 import type { Imovel, ImovelSimilar } from './types'
 
 let publicClient: SupabaseClient | null = null
 let adminClient: SupabaseClient | null = null
 
-function requireEnv(name: string) {
-  const value = process.env[name]?.trim()
-  if (!value) throw new Error(`Configure ${name} nas variaveis de ambiente.`)
-  return value
-}
-
 function getPublicClient() {
   if (!publicClient) {
-    publicClient = createClient(
-      requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
-      requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
-    )
+    const env = getSupabasePublicEnv()
+    publicClient = createClient(env.url, env.anonKey)
   }
   return publicClient
 }
 
 function getAdminClient() {
   if (!adminClient) {
-    const serverKey = process.env.SUPABASE_SECRET_KEY?.trim()
-      || process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-
-    if (!serverKey) {
-      throw new Error('Configure SUPABASE_SECRET_KEY ou SUPABASE_SERVICE_ROLE_KEY para operacoes administrativas.')
-    }
-
-    adminClient = createClient(requireEnv('NEXT_PUBLIC_SUPABASE_URL'), serverKey, {
+    const env = getSupabaseAdminEnv()
+    adminClient = createClient(env.url, env.key, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,

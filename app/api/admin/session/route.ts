@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
   clearAdminSessionCookie,
+  hasAdminTokenConfigured,
   isAdminTokenValid,
   requireAdmin,
   setAdminSessionCookie,
@@ -34,8 +35,18 @@ export async function POST(req: NextRequest) {
   const parsed = adminSessionSchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return invalidRequest('Token de admin invalido.')
 
+  if (!hasAdminTokenConfigured()) {
+    return NextResponse.json(
+      { error: 'Admin nao configurado. Defina IMOVEL_ADMIN_TOKEN na Vercel Production.' },
+      { status: 503 },
+    )
+  }
+
   if (!isAdminTokenValid(parsed.data.token)) {
-    return NextResponse.json({ error: 'Admin nao autorizado.' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Token de admin invalido. Verifique IMOVEL_ADMIN_TOKEN na Vercel Production.' },
+      { status: 401 },
+    )
   }
 
   const response = NextResponse.json({ authenticated: true }, { headers: noStore })

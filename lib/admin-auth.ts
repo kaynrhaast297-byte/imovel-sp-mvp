@@ -9,6 +9,10 @@ function getExpectedToken() {
   return process.env.IMOVEL_ADMIN_TOKEN?.trim() ?? ''
 }
 
+export function hasAdminTokenConfigured() {
+  return Boolean(getExpectedToken())
+}
+
 function safeEqual(leftValue: string, rightValue: string) {
   const left = Buffer.from(leftValue)
   const right = Buffer.from(rightValue)

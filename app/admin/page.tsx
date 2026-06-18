@@ -171,7 +171,8 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       })
-      if (!res.ok) throw new Error('Token de admin invalido.')
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error ?? 'Token de admin invalido.')
       setAdminToken('')
       setDesbloqueado(true)
       setStatus('idle')
