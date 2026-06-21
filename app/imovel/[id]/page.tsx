@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -13,9 +14,60 @@ import {
 } from 'lucide-react'
 import LeadForm from '@/components/LeadForm'
 import PriceAnalysis from '@/components/PriceAnalysis'
+import PropertyViewTracker from '@/components/PropertyViewTracker'
+import TrackedAnchor from '@/components/TrackedAnchor'
+import { absoluteUrl, siteConfig } from '@/lib/site'
 import { propertyPhoto } from '@/lib/property-visual'
 import { getImovelById, getImovelSimilares } from '@/lib/supabase'
 import { calcularAnalise, calcularPrecoM2, formatarArea, formatarPreco, labelNegocio, labelTipo } from '@/lib/utils'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+
+  try {
+    const imovel = await getImovelById(id)
+    const title = `${imovel.titulo} em ${imovel.bairro}, ${imovel.cidade}`
+    const description = `${labelTipo(imovel.tipo)} para ${labelNegocio(imovel.negocio).toLowerCase()} por ${formatarPreco(imovel.preco)}. Compare atributos e preco por metro quadrado no ImovelSP.`
+    const imageUrl = propertyPhoto(imovel)
+
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: absoluteUrl(`/imovel/${imovel.id}`),
+      },
+      openGraph: {
+        type: 'article',
+        title,
+        description,
+        url: absoluteUrl(`/imovel/${imovel.id}`),
+        siteName: siteConfig.name,
+        ...(imageUrl ? {
+          images: [
+            {
+              url: imageUrl,
+              alt: `Foto de ${imovel.titulo}`,
+            },
+          ],
+        } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        ...(imageUrl ? { images: [imageUrl] } : {}),
+      },
+    }
+  } catch {
+    return {
+      title: `Imovel indisponivel | ${siteConfig.name}`,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+}
 
 export default async function ImovelPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -52,6 +104,12 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="property-page">
+      <PropertyViewTracker
+        id={imovel.id}
+        title={imovel.titulo}
+        tipo={imovel.tipo}
+        preco={imovel.preco}
+      />
       <div className="property-topbar">
         <Link href="/busca" className="property-back"><ArrowLeft size={15} />Voltar para busca</Link>
         <div>
@@ -134,9 +192,20 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
               {imovel.iptu && <span>IPTU <strong>{formatarPreco(imovel.iptu)}/ano</strong></span>}
             </div>
             {imovel.url_original && (
-              <a href={imovel.url_original} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+              <TrackedAnchor
+                href={imovel.url_original}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+                eventName="click_outbound"
+                eventParams={{
+                  item_id: imovel.id,
+                  item_name: imovel.titulo,
+                  link_url: imovel.url_original,
+                }}
+              >
                 Ver anuncio original <ArrowUpRight size={15} />
-              </a>
+              </TrackedAnchor>
             )}
           </div>
           <LeadForm imovelId={imovel.id} imovelTitulo={imovel.titulo} />

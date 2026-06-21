@@ -84,7 +84,14 @@ jobs:
         run: npm run check:security
 
       - name: Verificar whitespace do diff da branch
-        run: git diff --check origin/master...HEAD
+        run: |
+          base_sha="${{ github.event.pull_request.base.sha || github.event.before }}"
+          zero_sha="0000000000000000000000000000000000000000"
+          if [ -z "$base_sha" ] || [ "$base_sha" = "$zero_sha" ]; then
+            git diff --check HEAD~1...HEAD
+          else
+            git diff --check "$base_sha...HEAD"
+          fi
 
       - name: Testar o proprio DevCheck
         run: npm run test:devcheck

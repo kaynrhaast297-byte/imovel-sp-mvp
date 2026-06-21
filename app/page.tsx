@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
   BarChart3,
@@ -16,41 +15,41 @@ import { heroPhoto } from '@/lib/property-visual'
 
 const featured = [
   {
-    title: 'Apartamento garden em Pinheiros',
-    area: '94 m2',
-    rooms: '2 quartos',
-    price: 'R$ 1.180.000',
-    priceM2: 'R$ 12.553 /m2',
-    variation: '-2,1% nos ultimos 6 meses',
+    title: 'Busca guiada em Pinheiros',
+    area: '70 a 110 m2',
+    rooms: '2+ quartos',
+    price: 'Faixa para validacao',
+    priceM2: 'R$ 12k a R$ 16k /m2',
+    variation: 'dados reais pendentes',
     image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=84',
     neighborhood: 'Pinheiros',
   },
   {
-    title: 'Studio premium na Vila Olimpia',
-    area: '41 m2',
-    rooms: '1 quarto',
-    price: 'R$ 620.000',
-    priceM2: 'R$ 15.122 /m2',
-    variation: '+4,3% nos ultimos 6 meses',
+    title: 'Busca guiada na Vila Olimpia',
+    area: '30 a 55 m2',
+    rooms: '1+ quarto',
+    price: 'Faixa para validacao',
+    priceM2: 'R$ 14k a R$ 18k /m2',
+    variation: 'dados reais pendentes',
     image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=84',
     neighborhood: 'Vila Olimpia',
   },
   {
-    title: 'Casa contemporanea no Alto de Pinheiros',
-    area: '220 m2',
-    rooms: '4 quartos',
-    price: 'R$ 3.450.000',
-    priceM2: 'R$ 15.682 /m2',
-    variation: '+1,2% nos ultimos 6 meses',
+    title: 'Busca guiada no Alto de Pinheiros',
+    area: '180 a 260 m2',
+    rooms: '4+ quartos',
+    price: 'Faixa para validacao',
+    priceM2: 'R$ 13k a R$ 17k /m2',
+    variation: 'dados reais pendentes',
     image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=84',
     neighborhood: 'Alto de Pinheiros',
   },
 ]
 
 const neighborhoods = [
-  ['Pinheiros', 'R$ 15.392 /m2', '+3,8%'],
-  ['Vila Madalena', 'R$ 19.082 /m2', '+4,3%'],
-  ['Moema', 'R$ 18.847 /m2', '+2,7%'],
+  ['Pinheiros', 'prioridade de validacao', 'busca'],
+  ['Vila Madalena', 'prioridade de validacao', 'busca'],
+  ['Moema', 'prioridade de validacao', 'busca'],
 ]
 
 export default function Home() {
@@ -63,11 +62,12 @@ export default function Home() {
     preco_max: '',
   })
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999'
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.trim()
   const whatsappMessage = process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE
     || 'Ola, quero ajuda para encontrar um imovel com preco justo.'
 
   const whatsappUrl = useMemo(() => {
+    if (!whatsappNumber) return null
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
   }, [whatsappMessage, whatsappNumber])
 
@@ -78,7 +78,8 @@ export default function Home() {
     if (form.negocio) params.set('negocio', form.negocio)
     if (form.quartos) params.set('quartos', form.quartos)
     if (form.preco_max) params.set('preco_max', form.preco_max)
-    router.push(`/busca?${params.toString()}`)
+    const query = params.toString()
+    router.push(query ? `/busca?${query}` : '/busca')
   }
 
   return (
@@ -154,8 +155,8 @@ export default function Home() {
 
       <section className="editorial-section selected-section" id="destaques">
         <div className="section-intro">
-          <p className="eyebrow">Destaques</p>
-          <h2>Imoveis selecionados em bairros desejados de Sao Paulo.</h2>
+          <p className="eyebrow">Recortes de busca</p>
+          <h2>Bairros prioritarios para validar a experiencia do ImovelSP.</h2>
           <button className="text-link" onClick={() => router.push('/busca')}>
             Ver todos os imoveis <ArrowRight size={16} />
           </button>
@@ -179,10 +180,7 @@ export default function Home() {
                 <strong>{item.price}</strong>
                 <div className="featured-analysis">
                   <span>{item.priceM2}</span>
-                  <span className={item.variation.startsWith('-') ? 'trend-down' : 'trend-up'}>
-                    {item.variation}
-                    {item.variation.startsWith('-') ? <ArrowDownRight size={13} /> : <ArrowUpRight size={13} />}
-                  </span>
+                  <span>{item.variation}</span>
                 </div>
               </div>
             </article>
@@ -193,13 +191,13 @@ export default function Home() {
       <section className="market-section" id="inteligencia">
         <div className="market-heading">
           <p className="eyebrow">Inteligencia de precos</p>
-          <h2>Informacao que valoriza suas escolhas.</h2>
-          <p>Compare valores anunciados, preco por metro quadrado e tendencias de cada bairro.</p>
+          <h2>Informacao para decidir melhor.</h2>
+          <p>As faixas atuais orientam a navegacao ate a entrada dos imoveis reais.</p>
         </div>
         <div className="market-lead">
-          <span>Preco medio a venda</span>
-          <strong>R$ 18.847<small>/m2</small></strong>
-          <p><ArrowUpRight size={15} /> +2,7% nos ultimos 6 meses</p>
+          <span>Status dos dados</span>
+          <strong>MVP <small>curado</small></strong>
+          <p><BarChart3 size={15} /> validar com imoveis reais</p>
         </div>
         <div className="neighborhood-list">
           {neighborhoods.map(([name, value, trend], index) => (
@@ -225,8 +223,8 @@ export default function Home() {
           </button>
         </div>
         <div className="neighborhood-metrics">
-          <span><BarChart3 size={18} /><strong>R$ 19.082/m2</strong>preco medio</span>
-          <span><Building size={18} /><strong>87%</strong>indice de liquidez</span>
+          <span><BarChart3 size={18} /><strong>Amostra</strong>dados a validar</span>
+          <span><Building size={18} /><strong>Sem ranking</strong>ate dados reais</span>
         </div>
       </section>
 
@@ -245,13 +243,19 @@ export default function Home() {
           <MessageCircle size={21} />
           <h3>Atendimento humano</h3>
           <p>Converse rapidamente sobre os imoveis que interessam.</p>
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">Falar no WhatsApp <ArrowUpRight size={14} /></a>
+          {whatsappUrl ? (
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">Falar no WhatsApp <ArrowUpRight size={14} /></a>
+          ) : (
+            <span className="service-contact-note">Contato sera ativado com canal oficial.</span>
+          )}
         </div>
       </section>
 
-      <a className="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Chamar no WhatsApp">
-        <MessageCircle size={22} />
-      </a>
+      {whatsappUrl ? (
+        <a className="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Chamar no WhatsApp">
+          <MessageCircle size={22} />
+        </a>
+      ) : null}
     </div>
   )
 }

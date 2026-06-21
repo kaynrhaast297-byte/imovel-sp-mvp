@@ -14,9 +14,24 @@ function makeRequest(body: unknown) {
   })
 }
 
+function makeRawRequest(body: string) {
+  return new NextRequest('http://localhost/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  })
+}
+
 describe('POST /api/ai', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it('retorna 400 se JSON estiver invalido', async () => {
+    const res = await POST(makeRawRequest('{'))
+
+    expect(res.status).toBe(400)
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 
   it('retorna 400 se prompt estiver ausente', async () => {
@@ -30,6 +45,22 @@ describe('POST /api/ai', () => {
 
   it('retorna 400 se prompt nao for string', async () => {
     const res = await POST(makeRequest({ prompt: 123 }))
+
+    expect(res.status).toBe(400)
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('retorna 413 se prompt exceder o limite', async () => {
+    const res = await POST(makeRequest({ prompt: 'a'.repeat(8001) }))
+    const json = await res.json()
+
+    expect(res.status).toBe(413)
+    expect(json.error).toMatch(/8000/)
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('retorna 400 se stream for solicitado', async () => {
+    const res = await POST(makeRequest({ prompt: 'Ola', stream: true }))
 
     expect(res.status).toBe(400)
     expect(mockFetch).not.toHaveBeenCalled()
@@ -53,11 +84,15 @@ describe('POST /api/ai', () => {
     expect(json.model).toBe('qwen2.5-coder:7b')
     expect(mockFetch).toHaveBeenCalledWith(
       'http://localhost:11434/api/generate',
-      expect.objectContaining({ method: 'POST' }),
+      expect.objectContaining({
+        method: 'POST',
+        signal: expect.any(AbortSignal),
+        body: JSON.stringify({ model: 'qwen2.5-coder:7b', prompt: 'Ola', stream: false }),
+      }),
     )
   })
 
-  it('retorna erro do Ollama preservando status', async () => {
+  it('retorna erro seguro quando Ollama falha', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
@@ -67,8 +102,8 @@ describe('POST /api/ai', () => {
     const res = await POST(makeRequest({ prompt: 'teste' }))
     const json = await res.json()
 
-    expect(res.status).toBe(404)
-    expect(json.error).toMatch(/modelo nao encontrado/i)
+    expect(res.status).toBe(502)
+    expect(json.error).not.toMatch(/modelo nao encontrado/i)
   })
 
   it('retorna 503 quando Ollama esta offline', async () => {
@@ -79,6 +114,18 @@ describe('POST /api/ai', () => {
 
     expect(res.status).toBe(503)
     expect(json.error).toMatch(/ollama/i)
+  })
+
+  it('retorna 504 quando Ollama excede o tempo limite', async () => {
+    const error = new Error('aborted')
+    error.name = 'AbortError'
+    mockFetch.mockRejectedValueOnce(error)
+
+    const res = await POST(makeRequest({ prompt: 'teste' }))
+    const json = await res.json()
+
+    expect(res.status).toBe(504)
+    expect(json.error).toMatch(/demorou/i)
   })
 })
 

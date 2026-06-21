@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { Bath, BedDouble, CarFront, Expand, Heart, MapPin } from 'lucide-react'
+import TrackedLink from '@/components/TrackedLink'
 import { Imovel } from '@/lib/types'
 import { propertyPhoto } from '@/lib/property-visual'
 import { calcularPrecoM2, formatarArea, formatarPreco, labelNegocio, labelTipo } from '@/lib/utils'
@@ -12,7 +12,23 @@ export default function ImovelCard({ imovel }: Props) {
   const precoM2 = calcularPrecoM2(imovel.preco, imovel.area_m2)
 
   return (
-    <Link className="property-card-link" href={`/imovel/${imovel.id}`} aria-label={`Ver ${imovel.titulo}`}>
+    <TrackedLink
+      className="property-card-link"
+      href={`/imovel/${imovel.id}`}
+      aria-label={`Ver ${imovel.titulo}`}
+      eventName="select_item"
+      eventParams={{
+        item_list_name: 'search_results',
+        items: [
+          {
+            item_id: imovel.id,
+            item_name: imovel.titulo,
+            item_category: imovel.tipo,
+            price: imovel.preco,
+          },
+        ],
+      }}
+    >
       <article className="property-card">
         <div
           className="property-card-media"
@@ -53,6 +69,6 @@ export default function ImovelCard({ imovel }: Props) {
           </div>
         </div>
       </article>
-    </Link>
+    </TrackedLink>
   )
 }
