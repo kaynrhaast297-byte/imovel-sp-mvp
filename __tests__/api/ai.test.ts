@@ -25,6 +25,8 @@ function makeRawRequest(body: string) {
 describe('POST /api/ai', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.useRealTimers()
+    delete process.env.OLLAMA_TIMEOUT_MS
   })
 
   it('retorna 400 se JSON estiver invalido', async () => {
@@ -124,6 +126,34 @@ describe('POST /api/ai', () => {
     const res = await POST(makeRequest({ prompt: 'teste' }))
     const json = await res.json()
 
+    expect(res.status).toBe(504)
+    expect(json.error).toMatch(/demorou/i)
+  })
+
+  it('aborta a chamada ao Ollama quando o timeout configurado expira', async () => {
+    vi.useFakeTimers()
+    process.env.OLLAMA_TIMEOUT_MS = '5'
+    let receivedSignal: AbortSignal | undefined
+
+    mockFetch.mockImplementationOnce((_, init?: RequestInit) => {
+      receivedSignal = init?.signal ?? undefined
+
+      return new Promise((_, reject) => {
+        receivedSignal?.addEventListener('abort', () => {
+          const error = new Error('aborted')
+          error.name = 'AbortError'
+          reject(error)
+        })
+      })
+    })
+
+    const responsePromise = POST(makeRequest({ prompt: 'teste' }))
+    await vi.advanceTimersByTimeAsync(5)
+
+    const res = await responsePromise
+    const json = await res.json()
+
+    expect(receivedSignal?.aborted).toBe(true)
     expect(res.status).toBe(504)
     expect(json.error).toMatch(/demorou/i)
   })
