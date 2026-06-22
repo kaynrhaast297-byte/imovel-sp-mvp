@@ -1,23 +1,50 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { ArrowUpRight, AtSign, Building2, Search } from 'lucide-react'
+import Analytics from '@/components/Analytics'
+import { siteConfig } from '@/lib/site'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'ImovelSP - Comparador de Precos',
-  description: 'Compare precos de imoveis em Sao Paulo e saiba se o preco esta justo.',
+  metadataBase: new URL(siteConfig.url),
+  applicationName: siteConfig.name,
+  title: {
+    default: 'ImovelSP - Comparador de precos de imoveis em Sao Paulo',
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    siteName: siteConfig.name,
+    title: 'ImovelSP - Comparador de precos de imoveis em Sao Paulo',
+    description: siteConfig.description,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ImovelSP - Comparador de precos de imoveis em Sao Paulo',
+    description: siteConfig.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth">
       <body>
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
         <header className="site-header">
           <Link href="/" className="brand" aria-label="ImovelSP - Pagina inicial">
             Imovel<span>SP</span>
           </Link>
           <nav className="site-nav" aria-label="Navegacao principal">
-            <Link href="/busca"><Search size={15} />Comprar</Link>
+            <Link href="/busca?negocio=venda"><Search size={15} />Comprar</Link>
             <Link href="/busca?negocio=aluguel">Alugar</Link>
             <Link href="/#destaques">Selecionados</Link>
             <Link href="/#inteligencia">Inteligencia de preco</Link>

@@ -68,7 +68,7 @@ test.describe('Paginacao da busca', () => {
   test('clicar em Proxima atualiza URL para pagina 2', async ({ page }) => {
     await gotoHydrated(page, '/busca?page=1')
 
-    await page.getByRole('button', { name: 'Proxima' }).click()
+    await page.getByRole('link', { name: 'Proxima' }).click()
 
     await expect(page).toHaveURL(/\/busca\?.*page=2/)
     await expect(paginationStatus(page, 'Pagina 2 de 3')).toBeVisible()
@@ -77,7 +77,7 @@ test.describe('Paginacao da busca', () => {
   test('pagina 2 habilita Anterior', async ({ page }) => {
     await gotoHydrated(page, '/busca?page=2')
 
-    await expect(page.getByRole('button', { name: 'Anterior' })).toBeEnabled()
+    await expect(page.getByRole('link', { name: 'Anterior' })).toBeVisible()
     await expect(paginationStatus(page, 'Pagina 2 de 3')).toBeVisible()
   })
 
@@ -91,7 +91,7 @@ test.describe('Paginacao da busca', () => {
   test('preserva query params existentes ao paginar', async ({ page }) => {
     await gotoHydrated(page, '/busca?bairro=Pinheiros&negocio=venda')
 
-    await page.getByRole('button', { name: 'Proxima' }).click()
+    await page.getByRole('link', { name: 'Proxima' }).click()
 
     await expect(page).toHaveURL(/\/busca\?.*bairro=Pinheiros/)
     await expect(page).toHaveURL(/\/busca\?.*negocio=venda/)

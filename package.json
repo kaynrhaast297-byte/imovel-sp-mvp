@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit --incremental false",
     "test": "vitest run",
     "test:devcheck": "node scripts/run-devcheck-tests.mjs",
     "test:watch": "vitest",

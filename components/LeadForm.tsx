@@ -5,6 +5,7 @@ import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { ArrowRight, MessageCircle } from 'lucide-react'
 import { z } from 'zod'
+import { trackEvent } from '@/lib/analytics'
 
 const leadSchema = z.object({
   nome: z.string().trim().min(2, 'Informe seu nome.'),
@@ -59,6 +60,11 @@ export default function LeadForm({ imovelId, imovelTitulo }: LeadFormProps) {
 
       setStatus('success')
       setFeedback('Contato enviado. Em breve alguem fala com voce.')
+      trackEvent('generate_lead', {
+        item_id: imovelId,
+        item_name: imovelTitulo,
+        lead_source: 'pagina_imovel',
+      })
       reset({
         nome: '',
         telefone: '',

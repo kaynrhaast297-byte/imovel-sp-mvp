@@ -391,6 +391,7 @@ textarea { resize: vertical; }
 .service-strip h3 { font-family: var(--font-dm-serif); font-size: 1.25rem; font-weight: 400; margin: .8rem 0 .3rem; }
 .service-strip p { color: var(--muted); font-size: .75rem; max-width: 300px; }
 .service-strip a { align-items: center; color: var(--forest); display: inline-flex; font-size: .68rem; font-weight: 800; gap: .3rem; margin-top: .75rem; text-decoration: none; text-transform: uppercase; }
+.service-contact-note { color: var(--muted); display: inline-flex; font-size: .68rem; font-weight: 800; margin-top: .75rem; text-transform: uppercase; }
 .floating-whatsapp {
   align-items: center;
   background: var(--forest);
@@ -444,7 +445,7 @@ textarea { resize: vertical; }
 .filter-title { border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
 .filter-title > div { gap: .5rem; }
 .filter-title h2 { font-family: var(--font-dm-serif); font-size: 1.3rem; font-weight: 400; }
-.filter-title button { background: transparent; border: 0; color: var(--forest); cursor: pointer; font-size: .65rem; font-weight: 800; text-transform: uppercase; }
+.filter-title a { color: var(--forest); font-size: .65rem; font-weight: 800; text-decoration: none; text-transform: uppercase; }
 .filter-fields { display: flex; flex-direction: column; gap: 1rem; padding-top: 1rem; }
 .filter-field { display: block; }
 .filter-submit { width: 100%; }
