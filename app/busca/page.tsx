@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState, type FormEvent } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, ListFilter, Search, SlidersHorizontal } from 'lucide-react'
 import ImovelCard from '@/components/ImovelCard'
 import { trackEvent } from '@/lib/analytics'
@@ -19,7 +19,6 @@ const emptyPagination: Pagination = {
 }
 
 function BuscaConteudo() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const queryString = searchParams.toString()
   const [imoveis, setImoveis] = useState<Imovel[]>([])
@@ -32,8 +31,20 @@ function BuscaConteudo() {
   const negocioSelecionado = searchParams.get('negocio') ?? 'venda'
 
   function navigateSearch(params: URLSearchParams) {
+    window.location.assign(searchPath(params))
+  }
+
+  function searchPath(params: URLSearchParams) {
     const search = params.toString()
-    router.push(search ? `/busca?${search}` : '/busca')
+    return search ? `/busca?${search}` : '/busca'
+  }
+
+  function buildPagePath(page: number) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (!params.get('negocio')) params.set('negocio', 'venda')
+    params.set('page', String(page))
+    params.set('per_page', String(PER_PAGE))
+    return searchPath(params)
   }
 
   useEffect(() => {
@@ -138,22 +149,15 @@ function BuscaConteudo() {
     navigateSearch(params)
   }
 
-  function mudarPagina(page: number) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (!params.get('negocio')) params.set('negocio', 'venda')
-    params.set('page', String(page))
-    params.set('per_page', String(PER_PAGE))
-    navigateSearch(params)
-  }
-
-  function limparFiltros() {
+  function buildClearPath() {
     const params = new URLSearchParams()
     params.set('negocio', 'venda')
     params.set('page', '1')
     params.set('per_page', String(PER_PAGE))
-    navigateSearch(params)
+    return searchPath(params)
   }
 
+  const clearPath = buildClearPath()
   const totalLabel = pagination.total === 1
     ? '1 imovel encontrado'
     : `${pagination.total} imoveis encontrados`
@@ -175,7 +179,7 @@ function BuscaConteudo() {
               <ListFilter size={17} />
               <h2>Filtros</h2>
             </div>
-            <button type="button" onClick={limparFiltros}>Limpar</button>
+            <a href={clearPath}>Limpar</a>
           </div>
           <form
             key={queryString || 'default-search'}
@@ -294,9 +298,9 @@ function BuscaConteudo() {
                 <button type="button" className="btn btn-primary" onClick={() => setRetryToken((token) => token + 1)}>
                   Tentar novamente
                 </button>
-                <button type="button" className="btn btn-ghost" onClick={limparFiltros}>
+                <a href={clearPath} className="btn btn-ghost">
                   Limpar filtros
-                </button>
+                </a>
               </div>
             </div>
           ) : imoveis.length === 0 ? (
@@ -305,9 +309,9 @@ function BuscaConteudo() {
               <h2>Nenhum imovel encontrado</h2>
               <p>Tente ajustar bairro, cidade ou faixa de preco.</p>
               <div className="search-state-actions">
-                <button type="button" className="btn btn-primary" onClick={limparFiltros}>
+                <a href={clearPath} className="btn btn-primary">
                   Limpar filtros
-                </button>
+                </a>
               </div>
             </div>
           ) : (
@@ -318,25 +322,27 @@ function BuscaConteudo() {
 
               {pagination.total_pages > 1 && (
                 <nav className="pagination" aria-label="Paginacao de imoveis">
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    disabled={!pagination.has_prev || loading}
-                    onClick={() => mudarPagina(pagination.page - 1)}
-                  >
-                    <ArrowLeft size={15} /> Anterior
-                  </button>
+                  {pagination.has_prev && !loading ? (
+                    <a className="btn btn-ghost" href={buildPagePath(pagination.page - 1)}>
+                      <ArrowLeft size={15} /> Anterior
+                    </a>
+                  ) : (
+                    <button type="button" className="btn btn-ghost" disabled>
+                      <ArrowLeft size={15} /> Anterior
+                    </button>
+                  )}
                   <span>
                     Pagina {pagination.page} de {pagination.total_pages}
                   </span>
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    disabled={!pagination.has_next || loading}
-                    onClick={() => mudarPagina(pagination.page + 1)}
-                  >
-                    Proxima <ArrowRight size={15} />
-                  </button>
+                  {pagination.has_next && !loading ? (
+                    <a className="btn btn-ghost" href={buildPagePath(pagination.page + 1)}>
+                      Proxima <ArrowRight size={15} />
+                    </a>
+                  ) : (
+                    <button type="button" className="btn btn-ghost" disabled>
+                      Proxima <ArrowRight size={15} />
+                    </button>
+                  )}
                 </nav>
               )}
             </>

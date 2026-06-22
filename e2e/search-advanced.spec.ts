@@ -62,7 +62,7 @@ test.describe('Busca avancada', () => {
     await page.getByLabel('Tipo').selectOption('apartamento')
     await page.getByLabel('Negocio').selectOption('aluguel')
     await page.getByLabel('Quartos minimos').selectOption('2')
-    await page.getByPlaceholder('R$ 0').fill('6500')
+    await page.getByLabel('Preco maximo').fill('6500')
     await page.getByRole('button', { name: 'Aplicar filtros' }).click()
 
     await expect(page).toHaveURL(/bairro=Pinheiros/)
@@ -93,7 +93,7 @@ test.describe('Busca avancada', () => {
     await expect(page.getByLabel('Tipo')).toHaveValue('casa')
     await expect(page.getByLabel('Negocio')).toHaveValue('aluguel')
     await expect(page.getByLabel('Quartos minimos')).toHaveValue('3')
-    await expect(page.getByPlaceholder('R$ 0')).toHaveValue('9000')
+    await expect(page.getByLabel('Preco maximo')).toHaveValue('9000')
   })
 
   test('exibe estado vazio quando nenhum imovel e encontrado', async ({ page }) => {
@@ -119,8 +119,10 @@ test.describe('Busca avancada', () => {
 
     await expect(page.getByRole('heading', { name: '0 imoveis encontrados' })).toBeVisible()
     await expect(page.getByText('Nenhum imovel encontrado', { exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Limpar filtros' }).click()
-    await expect(page).toHaveURL(/\/busca\?page=1&per_page=12$/)
+    await page.getByRole('link', { name: 'Limpar filtros' }).click()
+    await expect(page).toHaveURL(/\/busca\?.*negocio=venda/)
+    await expect(page).toHaveURL(/\/busca\?.*page=1/)
+    await expect(page).toHaveURL(/\/busca\?.*per_page=12/)
     await expect(page.getByRole('heading', { name: '0 imoveis encontrados' })).toBeVisible()
   })
 
