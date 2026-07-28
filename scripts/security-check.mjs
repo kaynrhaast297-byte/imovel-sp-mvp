@@ -89,7 +89,7 @@ function auditDependencies() {
   const maxAttempts = 3
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const result = npmCommand(['audit', '--json'])
+    const result = npmCommand(['audit', '--json', '--omit=dev'])
 
     let report
     try {
@@ -128,7 +128,7 @@ function auditDependencies() {
       return false
     }
 
-    console.log('Security check: npm audit sem vulnerabilidades conhecidas.')
+    console.log('Security check: dependencias de producao sem vulnerabilidades conhecidas.')
     return true
   }
 

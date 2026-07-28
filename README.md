@@ -159,7 +159,7 @@ O workflow `.github/workflows/ci.yml` roda em pushes para `master`, `main`, `dev
 - `npm run type-check`
 - `npm run build`
 - `npm run test:e2e` com relatorio HTML, execucao paralela no Ubuntu e snapshots visuais no Windows
-- `npm run check:security` com scan de segredos rastreados e `npm audit` sem vulnerabilidades aceitas
+- `npm run check:security` com scan de segredos rastreados e bloqueio por `npm audit --omit=dev`; a excecao temporaria da cadeia de desenvolvimento do ESLint esta documentada em `SECURITY.md`
 
 ## Proximos passos
 
