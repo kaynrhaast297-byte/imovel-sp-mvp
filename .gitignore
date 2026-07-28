@@ -1,8 +1,8 @@
 .next
 node_modules
 .npm-cache/
-.env.local
-.env
+.env*
+!.env.example
 dist
 coverage
 test-results
