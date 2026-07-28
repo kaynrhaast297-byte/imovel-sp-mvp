@@ -96,10 +96,37 @@ jobs:
       - name: Testar o proprio DevCheck
         run: npm run test:devcheck
 
+  database:
+    name: Banco reproduzivel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: 2.110.0
+          github-token: ${{ github.token }}
+
+      - name: Recriar banco pelas migrations
+        run: supabase db start
+
+      - name: Reaplicar migrations e seed
+        run: supabase db reset --local
+
+      - name: Testar schema e RLS
+        run: supabase test db
+
+      - name: Encerrar Supabase local
+        if: always()
+        run: supabase stop --no-backup
+
   build:
     name: Build Next.js
     runs-on: ubuntu-latest
-    needs: [test, lint, security]
+    needs: [test, lint, security, database]
 
     steps:
       - name: Checkout do codigo
