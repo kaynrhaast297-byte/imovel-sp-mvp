@@ -26,9 +26,11 @@ export default defineConfig({
       reportsDirectory: 'coverage',
       include: [
         'app/admin/page.tsx',
+        'components/admin/AdminPropertiesList.tsx',
         'app/ai/page.tsx',
         'app/api/admin/session/route.ts',
         'app/api/admin/geocode/route.ts',
+        'app/api/admin/imoveis/route.ts',
         'app/api/admin/property-images/route.ts',
         'app/api/ai/route.ts',
         'app/api/analise/route.ts',

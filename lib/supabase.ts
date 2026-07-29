@@ -6,7 +6,7 @@ import {
   type PropertyImageFile,
 } from './property-images'
 import { getSupabaseAdminEnv, getSupabasePublicEnv } from './runtime-env'
-import type { Imovel, ImovelSimilar } from './types'
+import type { AdminImoveisQuery, Imovel, ImovelSimilar } from './types'
 
 let publicClient: SupabaseClient | null = null
 let adminClient: SupabaseClient | null = null
@@ -47,7 +47,10 @@ function asPositiveInteger(value: unknown, fallback: number, max: number) {
 }
 
 function sanitizeSearchTerm(value: unknown) {
-  return asText(value).replace(/[,%]/g, ' ').replace(/\s+/g, ' ').trim()
+  return asText(value)
+    .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function isE2EMockEnabled() {
@@ -110,6 +113,48 @@ export async function getImoveis(filtros?: Record<string, unknown>) {
       total_pages: totalPages,
       has_next: page < totalPages,
       has_prev: page > 1,
+    },
+  }
+}
+
+export async function getAdminImoveis(filtros: AdminImoveisQuery) {
+  const from = (filtros.page - 1) * filtros.per_page
+  const to = from + filtros.per_page - 1
+  const search = sanitizeSearchTerm(filtros.q)
+
+  let query = getAdminClient()
+    .from('imoveis')
+    .select(
+      'id, titulo, tipo, negocio, status, preco, bairro, cidade, estado, created_at, updated_at',
+      { count: 'exact' },
+    )
+
+  if (filtros.status !== 'todos') query = query.eq('status', filtros.status)
+  if (search) {
+    query = query.or(
+      `titulo.ilike.%${search}%,bairro.ilike.%${search}%,cidade.ilike.%${search}%`,
+    )
+  }
+
+  const { data, error, count } = await query
+    .order('updated_at', { ascending: false })
+    .order('id', { ascending: true })
+    .range(from, to)
+
+  if (error) throw error
+
+  const total = count ?? 0
+  const totalPages = Math.max(Math.ceil(total / filtros.per_page), 1)
+
+  return {
+    imoveis: data ?? [],
+    pagination: {
+      page: filtros.page,
+      per_page: filtros.per_page,
+      total,
+      total_pages: totalPages,
+      has_next: filtros.page < totalPages,
+      has_prev: filtros.page > 1,
     },
   }
 }

@@ -166,6 +166,64 @@ describe('lib/supabase', () => {
     await expect(getImoveis()).rejects.toBe(error)
   })
 
+  it('lista imoveis administrativos com colunas minimas e ordem estavel', async () => {
+    const query = makeQuery({ data: [imovel], error: null, count: 41 })
+    const { getAdminImoveis, adminClient } = await loadSupabase([], [query])
+
+    const result = await getAdminImoveis({
+      page: 2,
+      per_page: 20,
+      status: 'inativo',
+      q: ' Pinheiros, % centro_(teste) ',
+    })
+
+    expect(adminClient.from).toHaveBeenCalledWith('imoveis')
+    expect(query.select).toHaveBeenCalledWith(
+      'id, titulo, tipo, negocio, status, preco, bairro, cidade, estado, created_at, updated_at',
+      { count: 'exact' },
+    )
+    expect(query.eq).toHaveBeenCalledWith('status', 'inativo')
+    expect(query.or).toHaveBeenCalledWith(
+      'titulo.ilike.%Pinheiros centro teste%,bairro.ilike.%Pinheiros centro teste%,cidade.ilike.%Pinheiros centro teste%',
+    )
+    expect(query.order).toHaveBeenNthCalledWith(1, 'updated_at', { ascending: false })
+    expect(query.order).toHaveBeenNthCalledWith(2, 'id', { ascending: true })
+    expect(query.range).toHaveBeenCalledWith(20, 39)
+    expect(result.pagination).toEqual({
+      page: 2,
+      per_page: 20,
+      total: 41,
+      total_pages: 3,
+      has_next: true,
+      has_prev: true,
+    })
+  })
+
+  it('nao filtra status ou texto vazios e propaga falha da listagem administrativa', async () => {
+    const emptyQuery = makeQuery({ data: null, error: null, count: null })
+    const error = new Error('admin select falhou')
+    const errorQuery = makeQuery({ data: null, error, count: null })
+    const { getAdminImoveis } = await loadSupabase([], [emptyQuery, errorQuery])
+    const filters = { page: 1, per_page: 20, status: 'todos' as const, q: '' }
+
+    const result = await getAdminImoveis(filters)
+
+    expect(emptyQuery.eq).not.toHaveBeenCalled()
+    expect(emptyQuery.or).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      imoveis: [],
+      pagination: {
+        page: 1,
+        per_page: 20,
+        total: 0,
+        total_pages: 1,
+        has_next: false,
+        has_prev: false,
+      },
+    })
+    await expect(getAdminImoveis(filters)).rejects.toBe(error)
+  })
+
   it('le detalhe e retorna fixtures quando E2E_MOCKS esta ativo', async () => {
     const detailQuery = makeQuery({ data: imovel, error: null })
     const { getImovelById, getImovelSimilares } = await loadSupabase([detailQuery])
