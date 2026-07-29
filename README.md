@@ -28,12 +28,25 @@ Comparador de precos de imoveis em Sao Paulo. A ideia central do MVP e ajudar o 
 
 ## Como executar
 
+Requisitos:
+
+- Node.js 24 LTS, declarado em `.nvmrc` e `package.json`
+- npm e `package-lock.json` como gerenciador e lockfile oficiais
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 Abra `http://localhost:3000`.
+
+O GitHub Actions e a Vercel usam a mesma serie Node.js 24. Para trocar de
+versao localmente com NVM antes da instalacao:
+
+```bash
+nvm install
+nvm use
+```
 
 ## Variaveis de ambiente
 

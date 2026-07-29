@@ -138,3 +138,35 @@ primeira issue de produto sera a listagem administrativa de imoveis.
 
 Referencias: issues #10 a #19, PR #8, PR #9, workflow `30325091044`,
 `docs/CONSOLIDATION_EXIT_CRITERIA.md`.
+
+## D013 - Node.js 24 como runtime oficial
+
+Status: Aceita
+
+Data: 2026-07-29
+
+Decisao: adotar Node.js 24 LTS como runtime oficial do desenvolvimento local,
+Codex, GitHub Actions e Vercel. A versao fica declarada em `.nvmrc` e
+`package.json`; o CI le `.nvmrc` em vez de repetir pins independentes.
+
+Motivo: o projeto ja foi validado no Node.js 24 do Codex, enquanto o CI ainda
+fixava Node.js 20 e o repositorio nao declarava runtime oficial. A Vercel usa
+Node.js 24 como padrao e anunciou a descontinuacao do Node.js 20 para
+2026-10-01. Uma unica fonte de versao reduz divergencias entre desenvolvimento,
+CI e deploy.
+
+Impacto: `@types/node` acompanha a serie 24, `npm ci` continua sendo a
+instalacao reproduzivel pelo `package-lock.json` e nenhuma funcionalidade,
+migration, RLS, credencial ou dado de producao e alterado.
+
+Rastreabilidade: follow-up de manutencao do risco residual registrado na issue
+#14.
+
+Referencias:
+
+- https://nodejs.org/en/blog/migrations/v22-to-v24
+- https://vercel.com/changelog/node-js-20-is-being-deprecated
+- https://vercel.com/docs/functions/runtimes/node-js/node-js-versions
+- https://nextjs.org/docs/app/getting-started/installation
+- https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#node-version-file
+- https://docs.npmjs.com/cli/v11/configuring-npm/package-json/
