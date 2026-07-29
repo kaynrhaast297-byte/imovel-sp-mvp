@@ -1,8 +1,9 @@
 # Auditoria Critica
 
-Status: governanca v0.1 criada durante a Consolidacao v1.0.
+Status: Consolidacao v1.0 encerrada em 2026-07-29.
 
-Prioridade atual: `AUD-003` - classificar o estado das worktrees e tratar higiene operacional apos o `AUD-002`.
+Prioridade atual: desenvolvimento de produto controlado. Riscos deferidos estao
+nas issues #15 e #16.
 
 Este arquivo transforma a auditoria tecnica em checklist executavel. Cada item critico deve virar issue na milestone `Consolidacao v1.0` antes de qualquer feature nova.
 
@@ -72,13 +73,16 @@ Cada relatorio de auditoria deve encerrar com:
 |---|---|---|---|---|---|---|---|
 | AUD-001 | Governanca | Existem multiplos clones/worktrees `imovel-sp-*` apontando para o mesmo remote. | Critica | GitHub Issues/Milestones + Git worktree/status/remote docs | Inventariar clones, integrar ou descartar melhorias com justificativa. | Inventario aprovado em `docs/audit/AUD-001-clone-inventory.md`; acoes derivadas pendentes. | Aprovado |
 | AUD-002 | Fonte da verdade | Existia risco de conhecimento importante fora da base candidata: `imovel-sp-mvp` tinha 8 commits exclusivos, 2 commits ahead e working tree suja por `.devcheck`. | Critica | Git merge-base/rev-list/diff/show docs + inventario AUD-001 | Classificar os 8 commits exclusivos, separar trabalho real de artefatos, e decidir destino: integrar, reescrever, arquivar ou descartar. | Relatorio `docs/audit/AUD-002-imovel-sp-mvp-commit-review.md` aprovado pelo Owner; nenhum commit justifica integracao direta. | Aprovado |
-| AUD-003 | Worktree hygiene | Apos AUD-002, o risco predominante passou a ser operacional: estado das worktrees, artefatos `.devcheck`, `.gitignore`, branches ahead/behind e working trees sujas. | Alta | Git worktree/status/diff docs e pratica Git | Classificar estado de cada worktree e decidir limpar, manter, arquivar ou aguardar, sem perder rastreabilidade. | Relatorio `docs/audit/AUD-003-worktree-state.md` com estado por worktree, evidencias, risco antes/depois e fechamento padrao. | Proximo |
-| AUD-004 | CI/CD | Branch principal ainda precisa confirmar protecao e status checks obrigatorios. | Critica | GitHub protected branches | Configurar branch protection com checks obrigatorios. | PR bloqueia merge se checks falharem. | Aberto |
-| AUD-005 | Testes | Gate local e CI precisam estar verdes no projeto oficial. | Critica | GitHub Actions Node.js CI | Rodar `npm run check`, `npm run gate` e CI remoto. | Logs de aprovacao registrados. | Aberto |
-| AUD-006 | Seguranca | Admin por token unico e aceitavel para MVP, mas fraco para producao. | Alta | Supabase Auth/RLS docs a pesquisar antes da correcao | Planejar migracao para auth real/RBAC apos consolidacao basica. | Issue e ADR especificos antes de implementar. | Aberto |
-| AUD-007 | API IA | `/api/ai` precisa de limites, timeout e tratamento de erro mais defensivo antes de producao. | Alta | Next.js route handlers e boas praticas de API a pesquisar | Definir contrato, limites e falha segura. | Testes de rota e casos de erro. | Aberto |
-| AUD-008 | Frontend | Projetos auxiliares usam `innerHTML`, `@ts-nocheck` e prototipos grandes sem validacao. | Media | OWASP XSS e TypeScript/Next.js docs a pesquisar | Corrigir depois da consolidacao do ImovelSP ou arquivar como prototipos. | Lint/type-check e revisao manual. | Aberto |
-| AUD-009 | Fonte da verdade final | `property-data-clean` ainda e base candidata, nao fonte final alinhada com branch principal, GitHub e deploy. | Critica | GitHub protected branches + GitHub Actions | Alinhar branch principal, GitHub e deploy ao mesmo estado validado depois de resolver commits exclusivos. | Branch principal/deploy confirmados e CI verde. | Aberto |
+| AUD-003 | Worktree hygiene | Apos AUD-002, o risco predominante passou a ser operacional: estado das worktrees, artefatos `.devcheck`, `.gitignore`, branches ahead/behind e working trees sujas. | Alta | Git worktree/status/diff docs e pratica Git | Classificar estado de cada worktree e decidir limpar, manter, arquivar ou aguardar, sem perder rastreabilidade. | Issue #12 fechada; relatorios AUD-003 e AUD-004B. | Concluido |
+| AUD-004 | CI/CD | Branch principal ainda precisava de protecao e status checks obrigatorios. | Critica | GitHub protected branches | Configurar branch protection com checks obrigatorios. | Issue #13 fechada; protecao confirmada pela API. | Concluido |
+| AUD-005 | Testes | Gate local e CI precisavam estar verdes no projeto oficial. | Critica | GitHub Actions Node.js CI | Rodar gates e CI remoto. | Issue #14 fechada; workflow `30325091044` verde. | Concluido |
+| AUD-006 | Seguranca | Admin por token unico e aceitavel para piloto, mas fraco para producao. | Alta | Supabase Auth/RLS | Planejar migracao para auth real/RBAC. | Issue #15 aberta em `Hardening pos-consolidacao`. | Deferido |
+| AUD-007 | API IA | `/api/ai` possui limites e timeout, mas nao rate limit persistente. | Alta | Next.js Route Handlers e AbortController | Adicionar rate limit antes de exposicao real. | Issue #16 aberta em `Hardening pos-consolidacao`. | Deferido |
+| AUD-008 | Frontend | Projetos auxiliares usam prototipos sem validacao suficiente. | Media | OWASP XSS e TypeScript/Next.js | Manter congelados; reaproveitar somente com issue propria. | Issue #17 fechada como not planned. | Risco aceito |
+| AUD-009 | Fonte da verdade final | Base, branch principal, GitHub, banco e deploy precisavam convergir. | Critica | GitHub, Vercel e Supabase CLI | Alinhar todos ao estado validado. | Issue #18 fechada; commit `4e414fc8`, CI e smoke verdes. | Concluido |
+
+As issues #10 a #19 foram criadas retrospectivamente em 2026-07-29 para
+corrigir a ausencia de rastreamento durante a execucao original.
 
 ## Conversao em issues
 

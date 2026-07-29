@@ -3,19 +3,27 @@
 Governance Version: 0.1
 Status: Approved
 Effective Date: 2026-06-19
+Consolidation Status: Completed
+Consolidation Closed: 2026-07-29
 Owner: Jonathan Medeiros
 
 ## Decisao oficial
 
-O ImovelSP entrou em `Consolidacao v1.0`.
+O ImovelSP concluiu a `Consolidacao v1.0` e entrou em
+`Desenvolvimento de Produto v1.0`.
 
-Base candidata oficial:
+Workspace oficial de desenvolvimento:
 
 ```text
 D:\ESTUDOS\PROJETOS\imovel-sp-property-data-clean
 ```
 
-Esta base so vira fonte final quando branch principal, GitHub e deploy estiverem alinhados ao mesmo estado validado.
+A fonte versionada final e `master` no GitHub. O workspace oficial, o CI e o
+deploy devem permanecer alinhados a ela.
+
+O rastreamento no GitHub foi criado retrospectivamente em 2026-07-29 para
+corrigir uma lacuna de processo. As issues nao existiam durante a execucao
+original dos AUDs; seus corpos registram essa condicao explicitamente.
 
 ## Objetivo
 
@@ -25,7 +33,10 @@ Sair do modo de acumulacao de features e entrar em engenharia de produto estavel
 Produto -> Governanca -> Codigo
 ```
 
-## Escopo da Consolidacao v1.0
+## Escopo historico da Consolidacao v1.0
+
+As regras abaixo valeram durante a fase encerrada e permanecem registradas para
+auditoria. Elas nao bloqueiam features aprovadas na fase atual.
 
 Permitido:
 
@@ -53,14 +64,15 @@ Excecoes:
 
 ## Fonte da verdade
 
-Existem quatro niveis que precisam convergir:
+Os quatro niveis de fonte da verdade sao:
 
 1. Repositorio GitHub.
 2. Branch principal.
-3. Workspace local candidato.
+3. Workspace local oficial.
 4. Deploy em producao.
 
-Enquanto esses niveis divergirem, `property-data-clean` permanece base candidata, nao fonte final.
+No fechamento, os quatro niveis convergiram no commit `4e414fc8`. Divergencias
+futuras voltam a bloquear releases ate novo alinhamento.
 
 ## Rastreabilidade
 
@@ -71,16 +83,24 @@ Enquanto esses niveis divergirem, `property-data-clean` permanece base candidata
 
 ## Branch principal
 
-A branch principal deve ser protegida antes do fechamento da Consolidacao v1.0.
+A branch principal foi protegida em 2026-07-29.
 
-Regras alvo:
+Regras ativas:
 
 - exigir pull request antes de merge;
-- exigir status checks antes de merge;
-- exigir branch atualizada antes de merge, se viavel;
+- exigir os oito status checks confirmados antes de merge;
+- exigir branch atualizada antes de merge;
 - impedir force push;
 - impedir delecao da branch protegida;
-- exigir resolucao de conversas quando aplicavel.
+- exigir resolucao de conversas;
+- aplicar a protecao ao administrador; bypass exige emergencia documentada.
+
+## Proxima fase
+
+Features voltam a ser permitidas desde que tenham issue, branch propria,
+fontes, criterios de aceite, validacao proporcional e pull request. A primeira
+entrega aprovada e a listagem administrativa de imoveis, sem misturar criacao,
+upload ou exclusao no mesmo incremento.
 
 ## Fontes
 

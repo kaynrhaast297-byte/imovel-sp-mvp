@@ -27,9 +27,14 @@ not create `imoveis`, `leads`, `historico_precos`, or `alertas_preco` before tho
 - Recreate and test the database in GitHub Actions with Supabase CLI `2.110.0` and pgTAP.
 - Do not run `db reset --linked` and do not mutate production during this PR.
 
-Before this branch can be merged, version `20260601202625` must be reviewed and marked as already
-applied in production migration history. The schema already exists there; replaying a baseline is
-not the deployment strategy.
+## Outcome
+
+- Migration `20260601202625` was reviewed and marked as already applied in the
+  production migration history with `supabase migration repair`.
+- The repair changed migration history only; it did not execute baseline SQL.
+- A second `migration list` aligned all four local and remote versions.
+- `db push --dry-run` returned no migrations, seeds, roles, or unexpected DDL.
+- PR #9 was merged in commit `4e414fc8`; its post-merge CI and Vercel deployment passed.
 
 ## Remaining findings
 

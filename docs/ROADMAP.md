@@ -9,8 +9,11 @@ Transformar o MVP tecnico em um MVP com imoveis reais, dados confiaveis e fluxo 
 ## Proxima meta
 
 ```text
-Cadastrar 1 imovel real perfeitamente.
+Entregar a primeira lista administrativa de imoveis sem ampliar o escopo.
 ```
+
+O cadastro de novos imoveis reais esta temporariamente indisponivel. O projeto
+avanca pela operabilidade do acervo existente, sem inventar dados.
 
 ## Fases
 
@@ -34,6 +37,25 @@ Cadastrar 1 imovel real perfeitamente.
 | 6 | Geocodificacao ViaCEP + Nominatim | `feature/property-data` | Implementado |
 | 7 | Cadastrar 1 imovel real completo | Manual | Preparado - sem inventar CEP/area |
 | 8 | Criar detalhe com galeria e mapa | `feature/property-experience` | Pendente |
+
+## Proxima entrega controlada
+
+Branch planejada: `feature/admin-properties-list`.
+
+Escopo:
+
+- rota administrativa server-side protegida;
+- listagem paginada dos imoveis existentes;
+- busca por titulo, bairro ou cidade;
+- filtro por status;
+- filtros sincronizados com a URL;
+- estados de loading, vazio e erro;
+- link para edicao, sem implementar a edicao nesta PR.
+
+Fora de escopo: criacao, exclusao, upload, mudanca de schema e auth nova.
+
+Pre-condicao: issue propria criada somente depois do fechamento da milestone
+`Consolidacao v1.0`.
 
 ## Regra de priorizacao
 
