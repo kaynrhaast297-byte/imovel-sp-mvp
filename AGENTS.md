@@ -1,8 +1,11 @@
 # ImovelSP Agent Rules
 
-This repository is in Consolidacao v1.0.
+This repository is in Desenvolvimento de Produto v1.0.
 
-Base candidata oficial:
+`Consolidacao v1.0` was formally closed on 2026-07-29 after the repository,
+`master`, CI, production deploy, and migration history were aligned.
+
+Workspace oficial de desenvolvimento:
 
 ```text
 D:\ESTUDOS\PROJETOS\imovel-sp-property-data-clean
@@ -10,11 +13,11 @@ D:\ESTUDOS\PROJETOS\imovel-sp-property-data-clean
 
 ## Regras inegociaveis
 
-- Nenhuma feature nova entra enquanto a milestone `Consolidacao v1.0` nao estiver fechada.
-- Nenhum clone local de `imovel-sp-*` recebe implementacao nova. Clones ficam em modo somente leitura ate inventario e consolidacao.
+- Toda feature nova deve nascer de issue com problema, criterio de aceite e plano de validacao.
+- Nenhum clone/worktree local de `imovel-sp-*`, exceto o workspace oficial, recebe implementacao nova.
 - Em caso de duvida entre criar feature nova e consolidar uma existente, consolidacao vence.
-- Excecoes so existem para correcao critica de seguranca ou disponibilidade.
-- Toda mudanca deve nascer no projeto candidato oficial.
+- Toda mudanca deve nascer no workspace oficial, em branch propria, e entrar em `master` por pull request.
+- Os riscos deferidos de autenticacao admin e rate limit da IA permanecem rastreados nas issues `#15` e `#16`.
 
 ## Antes de implementar
 

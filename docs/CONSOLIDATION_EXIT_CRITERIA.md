@@ -6,23 +6,41 @@ Nao depende de sensacao. Depende de criterios verificaveis.
 
 ## Criterios obrigatorios
 
-- [ ] Existe uma unica base candidata oficial documentada.
-- [ ] Todos os clones `imovel-sp-*` foram inventariados.
-- [ ] Melhorias relevantes dos clones foram integradas ou descartadas com justificativa.
-- [ ] Nenhum clone recebe implementacao nova.
-- [ ] Branch principal, GitHub e deploy estao alinhados ao mesmo estado validado.
-- [ ] Nao existem artefatos versionados indevidamente.
-- [ ] `.gitignore` cobre logs, builds, cache, envs locais e artefatos de ferramentas.
-- [ ] CI passa integralmente.
-- [ ] Testes locais relevantes passam integralmente.
-- [ ] Quality gate local passa integralmente.
-- [ ] Branch principal esta protegida.
-- [ ] Status checks obrigatorios estao configurados.
-- [ ] Auditoria critica foi convertida em issues.
-- [ ] Nenhuma issue critica da milestone permanece aberta.
-- [ ] Workspace esta documentado.
-- [ ] Working tree esta limpa antes do fechamento.
-- [ ] Nao houve expansao de escopo durante a consolidacao.
+- [x] Existe uma unica fonte oficial documentada: GitHub/`master`, com `property-data-clean` como workspace oficial.
+- [x] Todos os clones e worktrees `imovel-sp-*` foram inventariados em `AUD-001`.
+- [x] Melhorias relevantes foram integradas ou descartadas com justificativa em `AUD-002`.
+- [x] Nenhuma worktree congelada recebe implementacao nova.
+- [x] Branch principal, GitHub e deploy estao no commit `4e414fc8` validado.
+- [x] A fonte oficial nao contem artefatos versionados indevidamente.
+- [x] `.gitignore` cobre logs, builds, cache, envs locais e artefatos de ferramentas.
+- [x] CI de `master` passa integralmente no workflow `30325091044`.
+- [x] Testes relevantes passaram na PR #8, PR #9 e no CI pos-merge.
+- [x] Quality gate passou na baseline de dependencias e no job `Seguranca`.
+- [x] `master` esta protegida, inclusive para administradores.
+- [x] Oito checks obrigatorios estao configurados com branch atualizada.
+- [x] `AUD-001` a `AUD-009` foram convertidos nas issues #10 a #18 retrospectivamente.
+- [x] Nenhuma issue critica permanece aberta na milestone; #15 e #16 foram movidas para hardening futuro.
+- [x] Workspace e worktrees estao documentados nos relatorios `AUD-001` a `AUD-004B`.
+- [x] Worktrees oficiais estao limpas; a higiene historica de `imovel-sp-mvp` esta justificada e congelada.
+- [x] O fechamento permaneceu documental, sem feature ou expansao de escopo.
+
+## Reconstrucao retrospectiva
+
+A milestone e as issues #10 a #19 foram criadas em 2026-07-29. Elas nao
+existiam durante a execucao original dos AUDs. O objetivo foi corrigir a lacuna
+de rastreabilidade sem inventar evidencia retroativa.
+
+Evidencias principais:
+
+- PR #8: baseline de dependencias e zero vulnerabilidades de producao;
+- PR #9: banco reproduzivel por migrations, seed separado e testes pgTAP;
+- commit `4e414fc8`: estado alinhado de `master` e deploy;
+- workflow `30325091044`: sete jobs aprovados;
+- Vercel: deployment do commit com status `success`;
+- smoke de producao: homepage e `/api/imoveis?per_page=1` com HTTP 200;
+- Supabase: quatro migrations alinhadas e `db push --dry-run` vazio;
+- PAT `codex-migration-repair`: revogado, com CLI desconectada;
+- branch protection: PR, oito checks, conversas resolvidas, sem force-push ou delecao.
 
 ## Evidencias aceitas
 
@@ -54,4 +72,6 @@ npm run vercel:smoke
 
 ## Fechamento
 
-A milestone so pode ser fechada quando todos os criterios obrigatorios estiverem marcados ou tiverem justificativa formal registrada em issue/ADR.
+A `Consolidacao v1.0` foi encerrada em 2026-07-29 pela PR documental que fecha
+a issue #19. Os riscos nao concluidos foram movidos, ainda abertos, para a
+milestone `Hardening pos-consolidacao`.

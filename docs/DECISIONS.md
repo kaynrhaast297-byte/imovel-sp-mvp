@@ -113,3 +113,28 @@ Regra operacional: nenhuma auditoria futura deve custar mais tempo do que a muda
 Impacto: a Consolidacao deixa de ser tratada como processo aberto indefinidamente. As proximas melhorias devem priorizar medicao em producao, dados reais, indexacao, comportamento de busca e conversao antes de novas otimizacoes complexas como full-text search com migration.
 
 Referencias: Next.js Metadata/Sitemap/Robots, Google Search Central SEO Starter Guide, Supabase Full Text Search, WCAG 2.2, `docs/audit/AUD-001-clone-inventory.md`, `docs/audit/AUD-002-imovel-sp-mvp-commit-review.md`, `docs/audit/AUD-003-worktree-state.md`, `docs/audit/AUD-004A-hygiene-inventory.md`.
+
+## D012 - Consolidacao v1.0 encerrada com rastreabilidade retrospectiva
+
+Status: Aceita
+
+Data: 2026-07-29
+
+Decisao: encerrar a `Consolidacao v1.0` depois de alinhar `master`, GitHub,
+Vercel e historico de migrations, proteger a branch principal e registrar os
+nove AUDs no GitHub.
+
+Motivo: PRs #8 e #9, CI pos-merge, smoke de producao e dry-run do Supabase
+comprovaram a estabilidade tecnica. A milestone e as issues foram criadas
+posteriormente para corrigir uma lacuna real de rastreabilidade, sem alegar que
+existiam durante a execucao original.
+
+Riscos deferidos: #15 (Supabase Auth/RBAC) e #16 (rate limit persistente da IA)
+permanecem abertos em `Hardening pos-consolidacao`. Prototipos auxiliares nao
+serao integrados sem nova issue.
+
+Impacto: features podem voltar a ser desenvolvidas em branches proprias. A
+primeira issue de produto sera a listagem administrativa de imoveis.
+
+Referencias: issues #10 a #19, PR #8, PR #9, workflow `30325091044`,
+`docs/CONSOLIDATION_EXIT_CRITERIA.md`.
