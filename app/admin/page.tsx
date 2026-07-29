@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { ImagePlus, LogOut, MapPin, Save, Star, Trash2, Users } from 'lucide-react'
+import { Building2, ImagePlus, LogOut, MapPin, Save, Star, Trash2, Users } from 'lucide-react'
 import {
   CAMPOS,
   FORM_INICIAL,
@@ -263,9 +264,14 @@ export default function AdminPage() {
     <div style={{ maxWidth: '980px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1 style={{ fontFamily: 'var(--font-dm-serif)', fontSize: '1.75rem' }}>Painel Admin</h1>
-        <button className="btn btn-ghost" onClick={bloquear}>
-          <LogOut size={16} aria-hidden="true" /> Sair
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Link className="btn btn-ghost" href="/admin/imoveis">
+            <Building2 size={16} aria-hidden="true" /> Imoveis
+          </Link>
+          <button className="btn btn-ghost" onClick={bloquear}>
+            <LogOut size={16} aria-hidden="true" /> Sair
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0' }}>

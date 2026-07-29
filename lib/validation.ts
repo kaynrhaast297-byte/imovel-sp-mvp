@@ -64,6 +64,13 @@ export const adminSessionSchema = z.object({
   token: z.string().trim().min(1).max(512),
 }).strict()
 
+export const adminImoveisQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(10000).default(1),
+  per_page: z.coerce.number().int().min(1).max(50).default(20),
+  status: z.enum(['todos', 'ativo', 'inativo']).default('todos'),
+  q: z.string().trim().max(120).default(''),
+}).strict()
+
 export const geocodeRequestSchema = z.object({
   cep: cepSchema,
   numero: z.string().trim().max(30).optional(),

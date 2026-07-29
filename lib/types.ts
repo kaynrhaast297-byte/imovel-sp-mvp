@@ -55,6 +55,29 @@ export interface Pagination {
   has_prev: boolean
 }
 
+export type AdminImovelStatusFilter = 'todos' | 'ativo' | 'inativo'
+
+export interface AdminImovelListItem {
+  id: string
+  titulo: string
+  tipo: TipoImovel
+  negocio: TipoNegocio
+  status: StatusImovel
+  preco: number
+  bairro: string
+  cidade: string
+  estado: string
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminImoveisQuery {
+  page: number
+  per_page: number
+  status: AdminImovelStatusFilter
+  q: string
+}
+
 export interface AnalisePreco {
   imovel_id: string
   preco_medio_bairro: number
